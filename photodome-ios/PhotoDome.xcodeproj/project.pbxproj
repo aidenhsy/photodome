@@ -14,8 +14,10 @@
 		1D278CD527F922E0EC791FC7 /* APIClientIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4F660B8346D0CBC7F85B5B /* APIClientIntegrationTests.swift */; };
 		210FAB290E98893A9BFA750C /* EventRealtimeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679B95967B7EEB78E186D2C4 /* EventRealtimeClient.swift */; };
 		2366B38DF9E2CAD4EF142AAD /* EventAppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78172A764D1D485ACEBEC199 /* EventAppViewModel.swift */; };
+		292BD79920FDA1E1CCFD9907 /* EventTimestampFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078A3D75BBA467459E5748D3 /* EventTimestampFormatterTests.swift */; };
 		35C7DBEA9A051263C6BCACE2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 65249A677B793B5EEBEF2560 /* PrivacyInfo.xcprivacy */; };
 		36834C5793452BB3AF11A557 /* AppConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4420AB7BB5DD965D6F3C081 /* AppConfigurationTests.swift */; };
+		3752277711A0B0BDC55A603F /* ErrorMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01C49CDE7527F99D371BF8E5 /* ErrorMessageTests.swift */; };
 		3A4FE5819A86B2747DC00EC6 /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C75D57DB330CA93721BBB9 /* EventRepository.swift */; };
 		3E554E74AEAE046EC4507B5B /* AppThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65912FFF59CAD59BCD1A80D4 /* AppThemeTests.swift */; };
 		3F7818BB647E61AAC9698698 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 3A65F3081788D6AC695066BD /* SocketIO */; };
@@ -108,10 +110,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		01C49CDE7527F99D371BF8E5 /* ErrorMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorMessageTests.swift; sourceTree = "<group>"; };
 		034AF26D00E4FF951EA46739 /* EventAlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventAlbumView.swift; sourceTree = "<group>"; };
 		03F5E35259F3A3BA662299CB /* InvitePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvitePayload.swift; sourceTree = "<group>"; };
 		0413D14E007E569322AD2E38 /* KeychainCapabilityStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCapabilityStoreTests.swift; sourceTree = "<group>"; };
 		06FF816C1E04C4496B0D2A34 /* PhotoDomeTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PhotoDomeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		078A3D75BBA467459E5748D3 /* EventTimestampFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTimestampFormatterTests.swift; sourceTree = "<group>"; };
 		0C87FED5CFB01605D5EE4577 /* ImagePreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreprocessor.swift; sourceTree = "<group>"; };
 		0F117BAF7EDEBB770E7C5438 /* PhotoReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoReviewView.swift; sourceTree = "<group>"; };
 		169EDF632E01148865D16147 /* EventModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventModels.swift; sourceTree = "<group>"; };
@@ -340,7 +344,9 @@
 				7C4F660B8346D0CBC7F85B5B /* APIClientIntegrationTests.swift */,
 				D4420AB7BB5DD965D6F3C081 /* AppConfigurationTests.swift */,
 				65912FFF59CAD59BCD1A80D4 /* AppThemeTests.swift */,
+				01C49CDE7527F99D371BF8E5 /* ErrorMessageTests.swift */,
 				1D8B279E1ADFE16E1008882D /* EventDeepLinkTests.swift */,
+				078A3D75BBA467459E5748D3 /* EventTimestampFormatterTests.swift */,
 				7AB83B729FC89971CC1A26E8 /* InvitePayloadTests.swift */,
 				0413D14E007E569322AD2E38 /* KeychainCapabilityStoreTests.swift */,
 				4208DFBF9FA614627E253030 /* MediaPipelineTests.swift */,
@@ -594,7 +600,9 @@
 				1D278CD527F922E0EC791FC7 /* APIClientIntegrationTests.swift in Sources */,
 				36834C5793452BB3AF11A557 /* AppConfigurationTests.swift in Sources */,
 				3E554E74AEAE046EC4507B5B /* AppThemeTests.swift in Sources */,
+				3752277711A0B0BDC55A603F /* ErrorMessageTests.swift in Sources */,
 				E8093805DC6F64372D422FC2 /* EventDeepLinkTests.swift in Sources */,
+				292BD79920FDA1E1CCFD9907 /* EventTimestampFormatterTests.swift in Sources */,
 				E3C44A99E69BCB53B9FF83FB /* InvitePayloadTests.swift in Sources */,
 				A384D5CC5B48E21502EE017F /* KeychainCapabilityStoreTests.swift in Sources */,
 				0ECA97CCB1EAFFD17B82E327 /* MediaPipelineTests.swift in Sources */,
@@ -653,6 +661,7 @@
 					"@executable_path/Frameworks",
 				);
 				PHOTODOME_API_BASE_URL = "$(PHOTODOME_RELEASE_API_BASE_URL)";
+				PHOTODOME_RELEASE_API_BASE_URL = "https://api.kindredarc.com";
 				PRODUCT_BUNDLE_IDENTIFIER = com.younger7jp.photodome;
 				PRODUCT_NAME = PhotoDome;
 				SDKROOT = iphoneos;

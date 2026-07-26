@@ -73,6 +73,7 @@ targets:
         Debug:
           PHOTODOME_API_BASE_URL: http://127.0.0.1:3000
         Release:
+          PHOTODOME_RELEASE_API_BASE_URL: https://api.kindredarc.com
           PHOTODOME_API_BASE_URL: $(PHOTODOME_RELEASE_API_BASE_URL)
     preBuildScripts:
       - path: Scripts/validate-release-configuration.sh
