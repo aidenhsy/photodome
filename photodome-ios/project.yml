@@ -56,6 +56,7 @@ targets:
         NSCameraUsageDescription: Take photos for a PhotoDome event or scan an event QR code.
         NSPhotoLibraryUsageDescription: Add photos from your library to this private event.
         NSPhotoLibraryAddUsageDescription: Save your selected event photos to your photo library.
+        NSLocationWhenInUseUsageDescription: Add the precise shutter-time location to photos you share with a PhotoDome event.
         PhotoDomeAPIBaseURL: $(PHOTODOME_API_BASE_URL)
         NSSupportsLiveActivities: true
         CFBundleURLTypes:

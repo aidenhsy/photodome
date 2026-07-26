@@ -38,6 +38,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Take photos for a PhotoDome event or scan an event QR code.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Add the precise shutter-time location to photos you share with a PhotoDome event.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save your selected event photos to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
