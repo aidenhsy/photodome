@@ -1,0 +1,49 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'photodome-api/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 34.84.34.186
+          username: aidenhsy
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            cd /var/www/photodome
+            # Force-sync to the pushed commit instead of `git pull`: a merge
+            # aborts whenever the server's working tree has drifted (a stray
+            # edit, a raced/partial prior deploy), which then wedges every
+            # future deploy until someone manually resets. reset --hard is
+            # idempotent and always lands exactly on origin/main. (No
+            # `git clean` — it would delete untracked files like the server
+            # .env and gcp-credentials.json, and untracked files never
+            # blocked the deploy anyway.)
+            git fetch origin main
+            git reset --hard origin/main
+            cd photodome-api
+            sudo docker compose -f docker-compose.prod.yml up -d --build
+            healthy=false
+            for attempt in $(seq 1 30); do
+              if sudo docker compose -f docker-compose.prod.yml ps --status running --services | grep -qx photodome-api && curl -fsS http://127.0.0.1:4056/v1/health >/dev/null; then
+                healthy=true
+                break
+              fi
+              sleep 2
+            done
+            if [ "$healthy" != true ]; then
+              sudo docker compose -f docker-compose.prod.yml ps -a
+              sudo docker logs --tail 200 photodome-api
+              exit 1
+            fi
+            sudo docker system prune --force

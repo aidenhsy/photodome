@@ -1,0 +1,18 @@
+.DS_Store
+.env
+gcp-credentials.json
+
+# Separate git repository with its own remote (interactive design reference)
+photodome-design-system/
+.idea/
+.swiftpm/
+DerivedData/
+.derivedData/
+.derivedData*/
+build/
+node_modules/
+coverage/
+dist/
+*.xcuserstate
+xcuserdata/
+photodome-api/prisma/dev.db

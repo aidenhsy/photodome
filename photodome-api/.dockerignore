@@ -1,0 +1,47 @@
+# Dependencies (installed via npm ci in the build stage)
+node_modules
+
+# Build output
+dist
+build
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.sublime-workspace
+
+# Environment files
+.env
+.env.*
+
+# Tests & coverage
+coverage
+.nyc_output
+test
+
+# Logs
+logs
+*.log
+
+# OS
+.DS_Store
+
+# Temp
+.temp
+.tmp
+
+# Docs & config not needed at build time
+.claude
+.prettierrc
+eslint.config.mjs
+docker
+docker-compose.yml
+docker-compose.prod.yml
+Dockerfile
+
+# GCP service-account key (mounted at runtime, not baked into the image)
+gcp-credentials.json

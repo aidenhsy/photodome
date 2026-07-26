@@ -1,0 +1,153 @@
+name: PhotoDome
+options:
+  bundleIdPrefix: com.younger7jp
+  developmentLanguage: en
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+packages:
+  OpenAPIRuntime:
+    url: https://github.com/apple/swift-openapi-runtime
+    exactVersion: 1.12.0
+  OpenAPIURLSession:
+    url: https://github.com/apple/swift-openapi-urlsession
+    exactVersion: 1.3.0
+  SocketIO:
+    url: https://github.com/socketio/socket.io-client-swift
+    exactVersion: 16.1.1
+targets:
+  PhotoDome:
+    type: application
+    platform: iOS
+    entitlements:
+      path: PhotoDome/PhotoDome.entitlements
+    sources:
+      - path: PhotoDome
+      - path: Shared/EventActivityAttributes.swift
+    dependencies:
+      - target: PhotoDomeLiveActivity
+        embed: true
+      - package: OpenAPIRuntime
+      - package: OpenAPIURLSession
+      - package: SocketIO
+    info:
+      path: PhotoDome/Info.plist
+      properties:
+        CFBundleDisplayName: PhotoDome
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIRequiredDeviceCapabilities:
+          - armv7
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSCameraUsageDescription: Take photos for a PhotoDome event or scan an event QR code.
+        NSPhotoLibraryUsageDescription: Add photos from your library to this private event.
+        NSPhotoLibraryAddUsageDescription: Save your selected event photos to your photo library.
+        PhotoDomeAPIBaseURL: $(PHOTODOME_API_BASE_URL)
+        NSSupportsLiveActivities: true
+        CFBundleURLTypes:
+          - CFBundleURLName: com.younger7jp.photodome
+            CFBundleURLSchemes:
+              - photodome
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.younger7jp.photodome
+        PRODUCT_NAME: PhotoDome
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
+      configs:
+        Debug:
+          PHOTODOME_API_BASE_URL: http://127.0.0.1:3000
+        Release:
+          PHOTODOME_API_BASE_URL: $(PHOTODOME_RELEASE_API_BASE_URL)
+    preBuildScripts:
+      - path: Scripts/validate-release-configuration.sh
+        name: Validate Release Configuration
+        basedOnDependencyAnalysis: false
+  PhotoDomeLiveActivity:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: PhotoDomeLiveActivity
+      - path: Shared/EventActivityAttributes.swift
+    info:
+      path: PhotoDomeLiveActivity/Info.plist
+      properties:
+        CFBundleDisplayName: PhotoDome Activity
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.younger7jp.photodome.live-activity
+        PRODUCT_NAME: PhotoDomeLiveActivity
+        SKIP_INSTALL: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
+        GENERATE_INFOPLIST_FILE: NO
+  PhotoDomeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: PhotoDomeTests
+    dependencies:
+      - target: PhotoDome
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.younger7jp.photodome.tests
+        GENERATE_INFOPLIST_FILE: YES
+  PhotoDomeUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: PhotoDomeUITests
+    dependencies:
+      - target: PhotoDome
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.younger7jp.photodome.ui-tests
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  PhotoDome:
+    build:
+      targets:
+        PhotoDome: all
+        PhotoDomeLiveActivity: all
+        PhotoDomeTests:
+          - test
+        PhotoDomeUITests:
+          - test
+    test:
+      gatherCoverageData: true
+      targets:
+        - PhotoDomeTests
+        - PhotoDomeUITests
+  PhotoDome-Integration:
+    build:
+      targets:
+        PhotoDome: all
+        PhotoDomeLiveActivity: all
+        PhotoDomeTests:
+          - test
+        PhotoDomeUITests:
+          - test
+    test:
+      gatherCoverageData: false
+      environmentVariables:
+        PHOTODOME_API_INTEGRATION: "1"
+      targets:
+        - PhotoDomeTests

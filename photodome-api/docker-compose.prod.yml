@@ -1,0 +1,51 @@
+# Production stack for the deploy server. Local development uses
+# docker-compose.yml (postgres + redis + fake-gcs only, app runs on the host).
+services:
+  photodome-api:
+    build: .
+    container_name: photodome-api
+    restart: unless-stopped
+    ports:
+      - '4056:4056'
+    env_file:
+      - .env
+    volumes:
+      # GCS service-account key. Place the JSON next to this file on the
+      # server and set GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-credentials.json
+      - ./gcp-credentials.json:/app/gcp-credentials.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # Reached from the api container as postgresql://...@postgres:5432.
+  # Not exposed to the host.
+  postgres:
+    image: postgres:17
+    container_name: photodome-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: photodome
+      POSTGRES_USER: photodome
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - photodome-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U photodome -d photodome']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # BullMQ jobs — reach it from the api container as redis://redis:6379.
+  # Not exposed to the host.
+  redis:
+    image: redis:7-alpine
+    container_name: photodome-redis
+    restart: unless-stopped
+    volumes:
+      - photodome-redis:/data
+
+volumes:
+  photodome-postgres:
+  photodome-redis:

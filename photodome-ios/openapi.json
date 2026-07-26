@@ -1,0 +1,1730 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1/events": {
+      "post": {
+        "operationId": "createEvent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HostEventAccessDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create an event without an account",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/events/join": {
+      "post": {
+        "operationId": "joinEvent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JoinEventDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventAccessDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invite invalid, rotated, expired, or unavailable."
+          }
+        },
+        "summary": "Join a private event with its short code",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/events/{eventId}": {
+      "get": {
+        "operationId": "getEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSnapshotDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Get the authorized event snapshot",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/host-transfer": {
+      "post": {
+        "operationId": "createHostTransfer",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateHostTransferResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Create a short-lived one-time host transfer",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/v1/host-transfers/exchange": {
+      "post": {
+        "operationId": "exchangeHostTransfer",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExchangeHostTransferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventAccessDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transfer token invalid, consumed, or expired."
+          }
+        },
+        "summary": "Exchange a one-time token for rotated host authority",
+        "tags": [
+          "host transfers"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/end": {
+      "post": {
+        "operationId": "endEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSnapshotDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "End an event and start its seven-day retention clock",
+        "tags": [
+          "event controls"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/restrict-uploads": {
+      "post": {
+        "operationId": "restrictEventUploads",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSnapshotDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Block new upload reservations after an event has ended",
+        "tags": [
+          "event controls"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/members": {
+      "get": {
+        "operationId": "listEventMembers",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventMemberDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "List active anonymous event members",
+        "tags": [
+          "event controls"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/members/me": {
+      "patch": {
+        "operationId": "updateOwnEventDisplayName",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDisplayNameDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventSnapshotDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Update the current member display name",
+        "tags": [
+          "event controls"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/members/{memberId}": {
+      "delete": {
+        "operationId": "removeEventMember",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Remove an attendee and revoke their event access",
+        "tags": [
+          "event controls"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/rotate-code": {
+      "post": {
+        "operationId": "rotateEventJoinCode",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RotatedJoinCodeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Rotate the public join code",
+        "tags": [
+          "event controls"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/photos": {
+      "get": {
+        "operationId": "listEventPhotos",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlbumPhotoPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "List ready photos with short-lived private read URLs",
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/photos/reservations": {
+      "post": {
+        "operationId": "reservePhotoUpload",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePhotoReservationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoUploadGrantDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Uploads are closed or the event photo limit was reached."
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Reserve a photo and create a direct resumable upload session",
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/photos/{photoId}/upload-session": {
+      "post": {
+        "operationId": "renewPhotoUploadSession",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "photoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoUploadGrantDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Reissue a resumable session for an owned reservation",
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/photos/{photoId}/complete": {
+      "post": {
+        "operationId": "completePhotoUpload",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "photoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoCompletionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Verify an uploaded object and enqueue private image processing",
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/photos/{photoId}": {
+      "delete": {
+        "operationId": "removeEventPhoto",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "photoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Delete a ready photo contributed by the current member",
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/live-activity-token": {
+      "post": {
+        "description": "Stores the current per-activity token for event photo-count updates. Calling again replaces the previous token for this event member.",
+        "operationId": "registerEventLiveActivityToken",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterLiveActivityTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Register the caller’s rotating ActivityKit push token",
+        "tags": [
+          "live-activities"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/selections/review": {
+      "get": {
+        "operationId": "getPhotoReviewQueue",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewPhotoPageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "List this member’s remaining private review queue",
+        "tags": [
+          "curation"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/selections/{photoId}": {
+      "put": {
+        "operationId": "setPhotoSelection",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "photoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPhotoSelectionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhotoSelectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Privately keep or skip one photo for this member",
+        "tags": [
+          "curation"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/selections/latest": {
+      "delete": {
+        "operationId": "undoLatestSelection",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UndoPhotoSelectionDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Undo this member’s most recent private decision",
+        "tags": [
+          "curation"
+        ]
+      }
+    },
+    "/v1/events/{eventId}/download-manifest": {
+      "get": {
+        "operationId": "getDownloadManifest",
+        "parameters": [
+          {
+            "name": "eventId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "mode",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ALL",
+                "KEPT"
+              ]
+            }
+          },
+          {
+            "name": "photoId",
+            "required": false,
+            "in": "query",
+            "description": "Limit the manifest to one explicitly requested photo, including the viewer’s own contribution.",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 100,
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadManifestDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "eventCapability": []
+          }
+        ],
+        "summary": "Get paginated short-lived signed original URLs",
+        "tags": [
+          "curation"
+        ]
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "operationId": "getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check API liveness",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/v1/health/ready": {
+      "get": {
+        "operationId": "getReadiness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponseDto"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check PostgreSQL and Redis readiness",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "PhotoDome API",
+    "description": "Backend API for the PhotoDome iPhone app.",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "eventCapability": {
+        "scheme": "bearer",
+        "bearerFormat": "event capability",
+        "type": "http",
+        "description": "Opaque event-scoped host or guest capability."
+      }
+    },
+    "schemas": {
+      "CreateEventDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "displayName": {
+            "type": "string",
+            "example": "James",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "locationLabel": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          }
+        },
+        "required": [
+          "name",
+          "displayName"
+        ]
+      },
+      "EventViewerDto": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "HOST",
+              "GUEST"
+            ]
+          }
+        },
+        "required": [
+          "memberId",
+          "role"
+        ]
+      },
+      "EventSnapshotDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "James's birthday"
+          },
+          "hostDisplayName": {
+            "type": "string",
+            "example": "James"
+          },
+          "locationLabel": {
+            "type": "string",
+            "nullable": true,
+            "example": "Shibuya"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "LIVE",
+              "ENDED",
+              "EXPIRING"
+            ]
+          },
+          "memberCount": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100,
+            "example": 2
+          },
+          "readyPhotoCount": {
+            "type": "number",
+            "minimum": 0,
+            "example": 24
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-07-25T00:00:00.000Z"
+          },
+          "endedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "uploadsRestrictedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "viewer": {
+            "$ref": "#/components/schemas/EventViewerDto"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "hostDisplayName",
+          "state",
+          "memberCount",
+          "readyPhotoCount",
+          "createdAt",
+          "viewer"
+        ]
+      },
+      "HostEventAccessDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/EventSnapshotDto"
+          },
+          "capability": {
+            "type": "string",
+            "example": "pdc_OpaqueEventCapabilityReturnedOnce",
+            "writeOnly": true
+          },
+          "joinCode": {
+            "type": "string",
+            "example": "7JMPK4QX"
+          }
+        },
+        "required": [
+          "event",
+          "capability",
+          "joinCode"
+        ]
+      },
+      "JoinEventDto": {
+        "type": "object",
+        "properties": {
+          "joinCode": {
+            "type": "string",
+            "example": "7JMP-K4QX",
+            "minLength": 8,
+            "maxLength": 16
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Taylor",
+            "minLength": 1,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "joinCode",
+          "displayName"
+        ]
+      },
+      "EventAccessDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/EventSnapshotDto"
+          },
+          "capability": {
+            "type": "string",
+            "example": "pdc_OpaqueEventCapabilityReturnedOnce",
+            "writeOnly": true
+          }
+        },
+        "required": [
+          "event",
+          "capability"
+        ]
+      },
+      "CreateHostTransferResponseDto": {
+        "type": "object",
+        "properties": {
+          "transferToken": {
+            "type": "string",
+            "example": "pdt_OpaqueOneTimeTransferToken",
+            "writeOnly": true
+          },
+          "expiresAt": {
+            "type": "string",
+            "example": "2026-07-25T00:10:00.000Z"
+          }
+        },
+        "required": [
+          "transferToken",
+          "expiresAt"
+        ]
+      },
+      "ExchangeHostTransferDto": {
+        "type": "object",
+        "properties": {
+          "transferToken": {
+            "type": "string",
+            "example": "pdt_OpaqueOneTimeTransferToken"
+          }
+        },
+        "required": [
+          "transferToken"
+        ]
+      },
+      "EventMemberDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "Taylor"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "HOST",
+              "GUEST"
+            ]
+          },
+          "joinedAt": {
+            "type": "string"
+          },
+          "isViewer": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "role",
+          "joinedAt",
+          "isViewer"
+        ]
+      },
+      "UpdateDisplayNameDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "example": "Taylor",
+            "minLength": 1,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "displayName"
+        ]
+      },
+      "RotatedJoinCodeDto": {
+        "type": "object",
+        "properties": {
+          "joinCode": {
+            "type": "string",
+            "example": "8NPQ6RWT"
+          }
+        },
+        "required": [
+          "joinCode"
+        ]
+      },
+      "Object": {
+        "type": "object",
+        "properties": {}
+      },
+      "AlbumPhotoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contributorMemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "capturedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "readyAt": {
+            "type": "string"
+          },
+          "displayUrl": {
+            "type": "string"
+          },
+          "thumbnailUrl": {
+            "type": "string"
+          },
+          "urlsExpireAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contributorMemberId",
+          "width",
+          "height",
+          "capturedAt",
+          "readyAt",
+          "displayUrl",
+          "thumbnailUrl",
+          "urlsExpireAt"
+        ]
+      },
+      "AlbumPhotoPageDto": {
+        "type": "object",
+        "properties": {
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlbumPhotoDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "readyPhotoCount": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "photos",
+          "nextCursor",
+          "readyPhotoCount"
+        ]
+      },
+      "CreatePhotoReservationDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg"
+            ]
+          },
+          "byteSize": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20971520
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$",
+            "description": "SHA-256 of the exact prepared upload bytes."
+          },
+          "width": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20000
+          },
+          "height": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20000
+          },
+          "capturedAt": {
+            "type": "string"
+          },
+          "orientation": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 8,
+            "default": 1
+          }
+        },
+        "required": [
+          "contentType",
+          "byteSize",
+          "sha256",
+          "width",
+          "height"
+        ]
+      },
+      "PhotoUploadGrantDto": {
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uploadUrl": {
+            "type": "string",
+            "description": "Bearer-secret GCS resumable session URI. Never log or persist outside the upload queue."
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg"
+            ]
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "RESERVED",
+              "PROCESSING",
+              "READY",
+              "FAILED",
+              "REMOVED",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "photoId",
+          "uploadUrl",
+          "contentType",
+          "byteSize",
+          "state"
+        ]
+      },
+      "PhotoCompletionDto": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": [
+              "RESERVED",
+              "PROCESSING",
+              "READY",
+              "FAILED",
+              "REMOVED",
+              "EXPIRED"
+            ]
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "RegisterLiveActivityTokenDto": {
+        "type": "object",
+        "properties": {
+          "pushToken": {
+            "type": "string",
+            "description": "The current ActivityKit per-activity push token as hexadecimal.",
+            "example": "80f2b1c3d4e5f607",
+            "minLength": 2,
+            "maxLength": 512
+          }
+        },
+        "required": [
+          "pushToken"
+        ]
+      },
+      "ReviewPhotoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contributorMemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "capturedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "readyAt": {
+            "type": "string"
+          },
+          "displayUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "urlsExpireAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contributorMemberId",
+          "width",
+          "height",
+          "readyAt",
+          "displayUrl",
+          "thumbnailUrl",
+          "urlsExpireAt"
+        ]
+      },
+      "ReviewPhotoPageDto": {
+        "type": "object",
+        "properties": {
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewPhotoDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "readyPhotoCount": {
+            "type": "number"
+          },
+          "decidedPhotoCount": {
+            "type": "number"
+          },
+          "keptPhotoCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "photos",
+          "readyPhotoCount",
+          "decidedPhotoCount",
+          "keptPhotoCount"
+        ]
+      },
+      "SetPhotoSelectionDto": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "KEEP",
+              "SKIP"
+            ]
+          }
+        },
+        "required": [
+          "decision"
+        ]
+      },
+      "PhotoSelectionDto": {
+        "type": "object",
+        "properties": {
+          "photoId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "KEEP",
+              "SKIP"
+            ]
+          },
+          "decidedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "photoId",
+          "decision",
+          "decidedAt"
+        ]
+      },
+      "UndoPhotoSelectionDto": {
+        "type": "object",
+        "properties": {
+          "selection": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PhotoSelectionDto"
+              }
+            ]
+          }
+        }
+      },
+      "DownloadManifestPhotoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "byteSize": {
+            "type": "number"
+          },
+          "capturedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "readyAt": {
+            "type": "string"
+          },
+          "originalUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "urlExpiresAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contentType",
+          "byteSize",
+          "readyAt",
+          "originalUrl",
+          "urlExpiresAt"
+        ]
+      },
+      "DownloadManifestDto": {
+        "type": "object",
+        "properties": {
+          "photos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DownloadManifestPhotoDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "totalPhotoCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "photos",
+          "totalPhotoCount"
+        ]
+      },
+      "HealthResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ],
+            "example": "ok"
+          },
+          "service": {
+            "type": "string",
+            "enum": [
+              "photodome-api"
+            ],
+            "example": "photodome-api"
+          },
+          "version": {
+            "type": "string",
+            "example": "0.1.0"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-07-25T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "version",
+          "timestamp"
+        ]
+      },
+      "ReadinessDependenciesDto": {
+        "type": "object",
+        "properties": {
+          "postgres": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "example": "ok"
+          },
+          "redis": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "unavailable"
+            ],
+            "example": "ok"
+          }
+        },
+        "required": [
+          "postgres",
+          "redis"
+        ]
+      },
+      "ReadinessResponseDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "unavailable"
+            ],
+            "example": "ready"
+          },
+          "service": {
+            "type": "string",
+            "enum": [
+              "photodome-api"
+            ],
+            "example": "photodome-api"
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-07-25T00:00:00.000Z"
+          },
+          "dependencies": {
+            "$ref": "#/components/schemas/ReadinessDependenciesDto"
+          }
+        },
+        "required": [
+          "status",
+          "service",
+          "timestamp",
+          "dependencies"
+        ]
+      }
+    }
+  }
+}

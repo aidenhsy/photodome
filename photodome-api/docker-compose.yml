@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: photodome
+      POSTGRES_USER: photodome
+      POSTGRES_PASSWORD: photodome
+    ports:
+      - "5434:5432"
+    volumes:
+      - photodome-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U photodome -d photodome"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6381:6379"
+    volumes:
+      - photodome-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  gcs:
+    image: fsouza/fake-gcs-server:1.54.0
+    environment:
+      FAKE_GCS_SCHEME: http
+      FAKE_GCS_EXTERNAL_URL: http://127.0.0.1:4443
+    ports:
+      - "4443:4443"
+    volumes:
+      - ./docker/gcs-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--output-document=-",
+          "http://127.0.0.1:4443/storage/v1/b",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  photodome-postgres:
+  photodome-redis:

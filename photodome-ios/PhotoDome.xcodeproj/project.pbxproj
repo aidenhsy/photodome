@@ -1,0 +1,1016 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		05DC536792F62AFA0C528201 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 915BFA0ABCB7B5C284E0101B /* Assets.xcassets */; };
+		0ECA97CCB1EAFFD17B82E327 /* MediaPipelineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4208DFBF9FA614627E253030 /* MediaPipelineTests.swift */; };
+		0FFFCF4356D3195D8B82AD56 /* PhotoDomeLiveActivityBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16D925B7C207B4E2AAC6B03 /* PhotoDomeLiveActivityBundle.swift */; };
+		1A58112DA66CE2CEFD391C8F /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B8A2222F5D4C9D677FE77E /* EventActivityAttributes.swift */; };
+		1D278CD527F922E0EC791FC7 /* APIClientIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C4F660B8346D0CBC7F85B5B /* APIClientIntegrationTests.swift */; };
+		210FAB290E98893A9BFA750C /* EventRealtimeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 679B95967B7EEB78E186D2C4 /* EventRealtimeClient.swift */; };
+		2366B38DF9E2CAD4EF142AAD /* EventAppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78172A764D1D485ACEBEC199 /* EventAppViewModel.swift */; };
+		35C7DBEA9A051263C6BCACE2 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 65249A677B793B5EEBEF2560 /* PrivacyInfo.xcprivacy */; };
+		36834C5793452BB3AF11A557 /* AppConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4420AB7BB5DD965D6F3C081 /* AppConfigurationTests.swift */; };
+		3A4FE5819A86B2747DC00EC6 /* EventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72C75D57DB330CA93721BBB9 /* EventRepository.swift */; };
+		3E554E74AEAE046EC4507B5B /* AppThemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65912FFF59CAD59BCD1A80D4 /* AppThemeTests.swift */; };
+		3F7818BB647E61AAC9698698 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = 3A65F3081788D6AC695066BD /* SocketIO */; };
+		46F3D76384F756F8F37DC3E1 /* EventTakeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D3AB275240CA8D015C6CBDC /* EventTakeHomeView.swift */; };
+		494AC70E83DDC617B066694F /* Client.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4C220AD92B83A8BBC2A4F08 /* Client.swift */; };
+		4B39A6C8A60A7E0EAE7582DB /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55DD3BC6B4A750479E81CC3E /* QRScannerView.swift */; };
+		4BBCBAFBB42FADCE85EFD091 /* OpenAPIURLSession in Frameworks */ = {isa = PBXBuildFile; productRef = A095B2100352F80D00488243 /* OpenAPIURLSession */; };
+		514BEEB0806E5F3CE8BF5406 /* CreateEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF8B61C513572312A0F085C8 /* CreateEventView.swift */; };
+		5198D53A68B2964D20450EBF /* PhotoDomeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E574EF48A0B6F3E151F14467 /* PhotoDomeApp.swift */; };
+		554D509400DBC8417AF83268 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20DE0005220560C903B49370 /* APIClient.swift */; };
+		5ADF1B088DA264EF315BC4AC /* KeychainCapabilityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF26D897EFB8D0638B35E605 /* KeychainCapabilityStore.swift */; };
+		5B1B361D70C30E37939379BA /* EventLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8326572C9EA6E25B8F5156 /* EventLiveActivityWidget.swift */; };
+		5DADCAE58AF82966929014FC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B12E8911C7F0F1CCA8CA5C2 /* AppDelegate.swift */; };
+		5F724FF85017DCCAABC1137E /* PhotoDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FAB77872F828FDDD2D2D2AB /* PhotoDownloadManager.swift */; };
+		652325528BDE36FAC79D62E8 /* ImagePreprocessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C87FED5CFB01605D5EE4577 /* ImagePreprocessor.swift */; };
+		6E8A0BA3F57B3AAF5828486F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB66F686AB146CC2F8522A40 /* ContentView.swift */; };
+		7381C4DB24406749EEF066E4 /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BD28C9EB96414FDF687195 /* EventDetailView.swift */; };
+		7598009EC70BB68A138F4223 /* DeviceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C36E4647D41AA999E0F50F /* DeviceProfile.swift */; };
+		779A97DDFEDE82D23491832C /* BackgroundUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426DAB751E1A8F6DA8771890 /* BackgroundUploadManager.swift */; };
+		7C158913E4B50D294EE0824B /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84DEA6B3430001BF671810D /* AppConfiguration.swift */; };
+		7DCF124EDBB970366BF3704D /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1865F6B34CAD4766015B49E /* AccessibilityUITests.swift */; };
+		96082CA1853A0FA6190665CC /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21DE4AA8D75B3FDD9E422D75 /* QRCodeView.swift */; };
+		9716B9EFDEE820311A59B0D8 /* EventAlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034AF26D00E4FF951EA46739 /* EventAlbumView.swift */; };
+		99C8E36898794F43199A8F11 /* PhotoDomeLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D3445F2D22F0B676E4CB50C5 /* PhotoDomeLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A2A42B0345FE1098C2530ABA /* PhotoLibraryWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44A42A0A0A3A41A2C75A6499 /* PhotoLibraryWriter.swift */; };
+		A384D5CC5B48E21502EE017F /* KeychainCapabilityStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0413D14E007E569322AD2E38 /* KeychainCapabilityStoreTests.swift */; };
+		A3890BEEF00088C8E3D39A46 /* APIHealthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 464459EC85D35F1C7D87FD00 /* APIHealthViewModel.swift */; };
+		A98E7956AB6F205A63F6BB5B /* PhotoReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F117BAF7EDEBB770E7C5438 /* PhotoReviewView.swift */; };
+		AB1F7DA302692A07F888E8D5 /* EventDeepLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D1C1014B1D84244CE99D16 /* EventDeepLink.swift */; };
+		B1118C0C8019FE4E868DA474 /* EventActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64B8A2222F5D4C9D677FE77E /* EventActivityAttributes.swift */; };
+		B2866A37FF53397B7AE3F942 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5966BDBCE52D6506673B97 /* AppTheme.swift */; };
+		B421FC7168DB8E8A54A48B86 /* UploadQueueStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48D19F06A079FA4D6BB95FD1 /* UploadQueueStore.swift */; };
+		B89A15E2827068013B624BDF /* DisplayNameOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67ACE4C078D92EC85908B5F3 /* DisplayNameOnboardingView.swift */; };
+		BEC6443B538451E91417C85F /* EventLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFDB52DBED78A3819722D5A6 /* EventLiveActivityManager.swift */; };
+		C1D1C6CA17DAD5E1FF1312B3 /* PhotoDomeComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F42F9A296BFCA707503CB29 /* PhotoDomeComponents.swift */; };
+		C2058122C4A16E332651206D /* OpenAPIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 22987B7445E0A8B6698585DE /* OpenAPIRuntime */; };
+		C7F4FF437A3B9407288739B6 /* EventAlbumViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3642B49F3402F8913299DC63 /* EventAlbumViewModel.swift */; };
+		CAF1A825BF82592DB258DE42 /* EventModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169EDF632E01148865D16147 /* EventModels.swift */; };
+		D543E352496E9F003FD33451 /* PhotoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F13EED62D2395BF04FDF1BF /* PhotoModels.swift */; };
+		D84740D4277659F4B0889416 /* PhotoReviewViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79FBFE96543AE413800568A6 /* PhotoReviewViewModel.swift */; };
+		DB24CC9A1AF9C01952FBECFC /* PhotoDomeTokens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAD5502C9D7605BC1386D40 /* PhotoDomeTokens.swift */; };
+		DBF5B6804C516973FBE202FD /* JoinEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEB7CF91085721B4E1496A10 /* JoinEventView.swift */; };
+		DDB45AB6E7F8CFDFFB55B7E8 /* APIClientMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 703E1DC813A3DA78C2710FBB /* APIClientMiddleware.swift */; };
+		E15E11D10706A835BD7BD211 /* InvitePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03F5E35259F3A3BA662299CB /* InvitePayload.swift */; };
+		E3C44A99E69BCB53B9FF83FB /* InvitePayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB83B729FC89971CC1A26E8 /* InvitePayloadTests.swift */; };
+		E8093805DC6F64372D422FC2 /* EventDeepLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8B279E1ADFE16E1008882D /* EventDeepLinkTests.swift */; };
+		F1EABAB461AA6712A920C7D9 /* PrivacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF287EBA6619151ABC514BE /* PrivacyView.swift */; };
+		F6D44D2E85EE6230D8A688CE /* EventCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50EA14268F31F478B7962068 /* EventCameraView.swift */; };
+		FDAD76FC65A6D1BF686A676C /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CF66F7621770A1596574D37 /* Types.swift */; };
+		FEEDB63C2D36D5BD585B3287 /* PermissionCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63D3D0A2B03FEAED6C57D788 /* PermissionCenter.swift */; };
+		FFC892CE8DC7B39126D11E22 /* PhotoDownloadQueueStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5ADF09B213FB850A7EE070 /* PhotoDownloadQueueStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		415D4EF1175A124E97225B27 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2A79AD63D312509FFAE6C9A1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4C17B872E114394022E30C1E;
+			remoteInfo = PhotoDome;
+		};
+		667E7DBC69C03D85A4BB1142 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2A79AD63D312509FFAE6C9A1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 224CF0FFAC3D8545F40CCE7A;
+			remoteInfo = PhotoDomeLiveActivity;
+		};
+		9A66C2AFDDBC7F8B1771773F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2A79AD63D312509FFAE6C9A1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4C17B872E114394022E30C1E;
+			remoteInfo = PhotoDome;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3B3905E759F5E0A1F3966557 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				99C8E36898794F43199A8F11 /* PhotoDomeLiveActivity.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		034AF26D00E4FF951EA46739 /* EventAlbumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventAlbumView.swift; sourceTree = "<group>"; };
+		03F5E35259F3A3BA662299CB /* InvitePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvitePayload.swift; sourceTree = "<group>"; };
+		0413D14E007E569322AD2E38 /* KeychainCapabilityStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCapabilityStoreTests.swift; sourceTree = "<group>"; };
+		06FF816C1E04C4496B0D2A34 /* PhotoDomeTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PhotoDomeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C87FED5CFB01605D5EE4577 /* ImagePreprocessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePreprocessor.swift; sourceTree = "<group>"; };
+		0F117BAF7EDEBB770E7C5438 /* PhotoReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoReviewView.swift; sourceTree = "<group>"; };
+		169EDF632E01148865D16147 /* EventModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventModels.swift; sourceTree = "<group>"; };
+		1D8B279E1ADFE16E1008882D /* EventDeepLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDeepLinkTests.swift; sourceTree = "<group>"; };
+		1E5966BDBCE52D6506673B97 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		20DE0005220560C903B49370 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		21DE4AA8D75B3FDD9E422D75 /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
+		2B0A2EA20830DB7F0FDC0F9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2D3AB275240CA8D015C6CBDC /* EventTakeHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTakeHomeView.swift; sourceTree = "<group>"; };
+		2F42F9A296BFCA707503CB29 /* PhotoDomeComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDomeComponents.swift; sourceTree = "<group>"; };
+		3642B49F3402F8913299DC63 /* EventAlbumViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventAlbumViewModel.swift; sourceTree = "<group>"; };
+		3EE93D2290447B10E7275524 /* PhotoDome.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PhotoDome.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		41CB6C727607357E83ED9855 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4208DFBF9FA614627E253030 /* MediaPipelineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPipelineTests.swift; sourceTree = "<group>"; };
+		426DAB751E1A8F6DA8771890 /* BackgroundUploadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundUploadManager.swift; sourceTree = "<group>"; };
+		44A42A0A0A3A41A2C75A6499 /* PhotoLibraryWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibraryWriter.swift; sourceTree = "<group>"; };
+		464459EC85D35F1C7D87FD00 /* APIHealthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIHealthViewModel.swift; sourceTree = "<group>"; };
+		48C36E4647D41AA999E0F50F /* DeviceProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProfile.swift; sourceTree = "<group>"; };
+		48D19F06A079FA4D6BB95FD1 /* UploadQueueStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadQueueStore.swift; sourceTree = "<group>"; };
+		50EA14268F31F478B7962068 /* EventCameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCameraView.swift; sourceTree = "<group>"; };
+		55DD3BC6B4A750479E81CC3E /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		5D4216088C611981B1893840 /* PhotoDomeUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PhotoDomeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		63D3D0A2B03FEAED6C57D788 /* PermissionCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionCenter.swift; sourceTree = "<group>"; };
+		64B8A2222F5D4C9D677FE77E /* EventActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventActivityAttributes.swift; sourceTree = "<group>"; };
+		65249A677B793B5EEBEF2560 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		65912FFF59CAD59BCD1A80D4 /* AppThemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppThemeTests.swift; sourceTree = "<group>"; };
+		679B95967B7EEB78E186D2C4 /* EventRealtimeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRealtimeClient.swift; sourceTree = "<group>"; };
+		67ACE4C078D92EC85908B5F3 /* DisplayNameOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayNameOnboardingView.swift; sourceTree = "<group>"; };
+		703E1DC813A3DA78C2710FBB /* APIClientMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClientMiddleware.swift; sourceTree = "<group>"; };
+		72C75D57DB330CA93721BBB9 /* EventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepository.swift; sourceTree = "<group>"; };
+		78172A764D1D485ACEBEC199 /* EventAppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventAppViewModel.swift; sourceTree = "<group>"; };
+		78D1C1014B1D84244CE99D16 /* EventDeepLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDeepLink.swift; sourceTree = "<group>"; };
+		79FBFE96543AE413800568A6 /* PhotoReviewViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoReviewViewModel.swift; sourceTree = "<group>"; };
+		7AB83B729FC89971CC1A26E8 /* InvitePayloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvitePayloadTests.swift; sourceTree = "<group>"; };
+		7C4F660B8346D0CBC7F85B5B /* APIClientIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClientIntegrationTests.swift; sourceTree = "<group>"; };
+		8CF66F7621770A1596574D37 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		8E5ADF09B213FB850A7EE070 /* PhotoDownloadQueueStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDownloadQueueStore.swift; sourceTree = "<group>"; };
+		8EAD5502C9D7605BC1386D40 /* PhotoDomeTokens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDomeTokens.swift; sourceTree = "<group>"; };
+		915BFA0ABCB7B5C284E0101B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9B12E8911C7F0F1CCA8CA5C2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		9F13EED62D2395BF04FDF1BF /* PhotoModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoModels.swift; sourceTree = "<group>"; };
+		9FAB77872F828FDDD2D2D2AB /* PhotoDownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDownloadManager.swift; sourceTree = "<group>"; };
+		A1865F6B34CAD4766015B49E /* AccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityUITests.swift; sourceTree = "<group>"; };
+		A640D2C43878FE799011E172 /* PhotoDome.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PhotoDome.entitlements; sourceTree = "<group>"; };
+		BFDB52DBED78A3819722D5A6 /* EventLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventLiveActivityManager.swift; sourceTree = "<group>"; };
+		CB8326572C9EA6E25B8F5156 /* EventLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventLiveActivityWidget.swift; sourceTree = "<group>"; };
+		D3445F2D22F0B676E4CB50C5 /* PhotoDomeLiveActivity.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = PhotoDomeLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4420AB7BB5DD965D6F3C081 /* AppConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfigurationTests.swift; sourceTree = "<group>"; };
+		D84DEA6B3430001BF671810D /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
+		E16D925B7C207B4E2AAC6B03 /* PhotoDomeLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDomeLiveActivityBundle.swift; sourceTree = "<group>"; };
+		E4BD28C9EB96414FDF687195 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
+		E574EF48A0B6F3E151F14467 /* PhotoDomeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDomeApp.swift; sourceTree = "<group>"; };
+		EDF287EBA6619151ABC514BE /* PrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyView.swift; sourceTree = "<group>"; };
+		EEB7CF91085721B4E1496A10 /* JoinEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinEventView.swift; sourceTree = "<group>"; };
+		EF26D897EFB8D0638B35E605 /* KeychainCapabilityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCapabilityStore.swift; sourceTree = "<group>"; };
+		F4C220AD92B83A8BBC2A4F08 /* Client.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Client.swift; sourceTree = "<group>"; };
+		FB66F686AB146CC2F8522A40 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FF8B61C513572312A0F085C8 /* CreateEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateEventView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CFCF72DFFF7D4ED254EEA958 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2058122C4A16E332651206D /* OpenAPIRuntime in Frameworks */,
+				4BBCBAFBB42FADCE85EFD091 /* OpenAPIURLSession in Frameworks */,
+				3F7818BB647E61AAC9698698 /* SocketIO in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		07217F65201B076023B204AC /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				20DE0005220560C903B49370 /* APIClient.swift */,
+				703E1DC813A3DA78C2710FBB /* APIClientMiddleware.swift */,
+				D84DEA6B3430001BF671810D /* AppConfiguration.swift */,
+				426DAB751E1A8F6DA8771890 /* BackgroundUploadManager.swift */,
+				48C36E4647D41AA999E0F50F /* DeviceProfile.swift */,
+				BFDB52DBED78A3819722D5A6 /* EventLiveActivityManager.swift */,
+				679B95967B7EEB78E186D2C4 /* EventRealtimeClient.swift */,
+				72C75D57DB330CA93721BBB9 /* EventRepository.swift */,
+				0C87FED5CFB01605D5EE4577 /* ImagePreprocessor.swift */,
+				EF26D897EFB8D0638B35E605 /* KeychainCapabilityStore.swift */,
+				63D3D0A2B03FEAED6C57D788 /* PermissionCenter.swift */,
+				9FAB77872F828FDDD2D2D2AB /* PhotoDownloadManager.swift */,
+				8E5ADF09B213FB850A7EE070 /* PhotoDownloadQueueStore.swift */,
+				44A42A0A0A3A41A2C75A6499 /* PhotoLibraryWriter.swift */,
+				48D19F06A079FA4D6BB95FD1 /* UploadQueueStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		1B270B39473F0984EE426E3C /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				64B8A2222F5D4C9D677FE77E /* EventActivityAttributes.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		1E2A19CB8520BB4342B0C574 = {
+			isa = PBXGroup;
+			children = (
+				BCAFB6BE936F97DD7D8F8974 /* PhotoDome */,
+				3D2F4B8C847EA27C382E6941 /* PhotoDomeLiveActivity */,
+				CDCAFD2F1E9113E0750CA6A4 /* PhotoDomeTests */,
+				64142E43BFFB27DBF259F16F /* PhotoDomeUITests */,
+				1B270B39473F0984EE426E3C /* Shared */,
+				66944BEEDD1D9F50D8A1DD8B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2FEC6E4CE5FAFE95A4B3C698 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				45D03A18F2D15089CA6551AD /* Capture */,
+				F905BD397930B0D16044CED2 /* Events */,
+				702B77F0F0CA47297A27A575 /* Foundation */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		3D2F4B8C847EA27C382E6941 /* PhotoDomeLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				CB8326572C9EA6E25B8F5156 /* EventLiveActivityWidget.swift */,
+				41CB6C727607357E83ED9855 /* Info.plist */,
+				E16D925B7C207B4E2AAC6B03 /* PhotoDomeLiveActivityBundle.swift */,
+			);
+			path = PhotoDomeLiveActivity;
+			sourceTree = "<group>";
+		};
+		45D03A18F2D15089CA6551AD /* Capture */ = {
+			isa = PBXGroup;
+			children = (
+				50EA14268F31F478B7962068 /* EventCameraView.swift */,
+			);
+			path = Capture;
+			sourceTree = "<group>";
+		};
+		5A1B126E5268BDACF5E1038B /* Design */ = {
+			isa = PBXGroup;
+			children = (
+				1E5966BDBCE52D6506673B97 /* AppTheme.swift */,
+				2F42F9A296BFCA707503CB29 /* PhotoDomeComponents.swift */,
+				8EAD5502C9D7605BC1386D40 /* PhotoDomeTokens.swift */,
+			);
+			path = Design;
+			sourceTree = "<group>";
+		};
+		64142E43BFFB27DBF259F16F /* PhotoDomeUITests */ = {
+			isa = PBXGroup;
+			children = (
+				A1865F6B34CAD4766015B49E /* AccessibilityUITests.swift */,
+			);
+			path = PhotoDomeUITests;
+			sourceTree = "<group>";
+		};
+		66944BEEDD1D9F50D8A1DD8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3EE93D2290447B10E7275524 /* PhotoDome.app */,
+				D3445F2D22F0B676E4CB50C5 /* PhotoDomeLiveActivity.appex */,
+				06FF816C1E04C4496B0D2A34 /* PhotoDomeTests.xctest */,
+				5D4216088C611981B1893840 /* PhotoDomeUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		702B77F0F0CA47297A27A575 /* Foundation */ = {
+			isa = PBXGroup;
+			children = (
+				464459EC85D35F1C7D87FD00 /* APIHealthViewModel.swift */,
+				FB66F686AB146CC2F8522A40 /* ContentView.swift */,
+				67ACE4C078D92EC85908B5F3 /* DisplayNameOnboardingView.swift */,
+				EDF287EBA6619151ABC514BE /* PrivacyView.swift */,
+			);
+			path = Foundation;
+			sourceTree = "<group>";
+		};
+		AD6D37F81C207D5935B7A1D8 /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				F4C220AD92B83A8BBC2A4F08 /* Client.swift */,
+				8CF66F7621770A1596574D37 /* Types.swift */,
+			);
+			path = Generated;
+			sourceTree = "<group>";
+		};
+		BCAFB6BE936F97DD7D8F8974 /* PhotoDome */ = {
+			isa = PBXGroup;
+			children = (
+				9B12E8911C7F0F1CCA8CA5C2 /* AppDelegate.swift */,
+				915BFA0ABCB7B5C284E0101B /* Assets.xcassets */,
+				2B0A2EA20830DB7F0FDC0F9B /* Info.plist */,
+				A640D2C43878FE799011E172 /* PhotoDome.entitlements */,
+				E574EF48A0B6F3E151F14467 /* PhotoDomeApp.swift */,
+				65249A677B793B5EEBEF2560 /* PrivacyInfo.xcprivacy */,
+				5A1B126E5268BDACF5E1038B /* Design */,
+				C0AEA0AFA7BF8EB01C80322A /* Domain */,
+				2FEC6E4CE5FAFE95A4B3C698 /* Features */,
+				AD6D37F81C207D5935B7A1D8 /* Generated */,
+				07217F65201B076023B204AC /* Services */,
+			);
+			path = PhotoDome;
+			sourceTree = "<group>";
+		};
+		C0AEA0AFA7BF8EB01C80322A /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				78D1C1014B1D84244CE99D16 /* EventDeepLink.swift */,
+				169EDF632E01148865D16147 /* EventModels.swift */,
+				03F5E35259F3A3BA662299CB /* InvitePayload.swift */,
+				9F13EED62D2395BF04FDF1BF /* PhotoModels.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		CDCAFD2F1E9113E0750CA6A4 /* PhotoDomeTests */ = {
+			isa = PBXGroup;
+			children = (
+				7C4F660B8346D0CBC7F85B5B /* APIClientIntegrationTests.swift */,
+				D4420AB7BB5DD965D6F3C081 /* AppConfigurationTests.swift */,
+				65912FFF59CAD59BCD1A80D4 /* AppThemeTests.swift */,
+				1D8B279E1ADFE16E1008882D /* EventDeepLinkTests.swift */,
+				7AB83B729FC89971CC1A26E8 /* InvitePayloadTests.swift */,
+				0413D14E007E569322AD2E38 /* KeychainCapabilityStoreTests.swift */,
+				4208DFBF9FA614627E253030 /* MediaPipelineTests.swift */,
+			);
+			path = PhotoDomeTests;
+			sourceTree = "<group>";
+		};
+		F905BD397930B0D16044CED2 /* Events */ = {
+			isa = PBXGroup;
+			children = (
+				FF8B61C513572312A0F085C8 /* CreateEventView.swift */,
+				034AF26D00E4FF951EA46739 /* EventAlbumView.swift */,
+				3642B49F3402F8913299DC63 /* EventAlbumViewModel.swift */,
+				78172A764D1D485ACEBEC199 /* EventAppViewModel.swift */,
+				E4BD28C9EB96414FDF687195 /* EventDetailView.swift */,
+				2D3AB275240CA8D015C6CBDC /* EventTakeHomeView.swift */,
+				EEB7CF91085721B4E1496A10 /* JoinEventView.swift */,
+				0F117BAF7EDEBB770E7C5438 /* PhotoReviewView.swift */,
+				79FBFE96543AE413800568A6 /* PhotoReviewViewModel.swift */,
+				21DE4AA8D75B3FDD9E422D75 /* QRCodeView.swift */,
+				55DD3BC6B4A750479E81CC3E /* QRScannerView.swift */,
+			);
+			path = Events;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		224CF0FFAC3D8545F40CCE7A /* PhotoDomeLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7194FC84A55E11E80953EE17 /* Build configuration list for PBXNativeTarget "PhotoDomeLiveActivity" */;
+			buildPhases = (
+				72F4AF48A9A557FD5D04C8E8 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PhotoDomeLiveActivity;
+			packageProductDependencies = (
+			);
+			productName = PhotoDomeLiveActivity;
+			productReference = D3445F2D22F0B676E4CB50C5 /* PhotoDomeLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		4C17B872E114394022E30C1E /* PhotoDome */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AF38BDDC5F14A5CFD8D8D3B9 /* Build configuration list for PBXNativeTarget "PhotoDome" */;
+			buildPhases = (
+				9A4EC42AB1052321C8E44FE2 /* Validate Release Configuration */,
+				025703D972929AF1BCFD005D /* Sources */,
+				3699C1317D5D1CADF5CB7929 /* Resources */,
+				CFCF72DFFF7D4ED254EEA958 /* Frameworks */,
+				3B3905E759F5E0A1F3966557 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FF558AD0908933B2B71E1C29 /* PBXTargetDependency */,
+			);
+			name = PhotoDome;
+			packageProductDependencies = (
+				22987B7445E0A8B6698585DE /* OpenAPIRuntime */,
+				A095B2100352F80D00488243 /* OpenAPIURLSession */,
+				3A65F3081788D6AC695066BD /* SocketIO */,
+			);
+			productName = PhotoDome;
+			productReference = 3EE93D2290447B10E7275524 /* PhotoDome.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7C8BA041448AC838CC4CB519 /* PhotoDomeUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 756021025D12D7A87C92E6DF /* Build configuration list for PBXNativeTarget "PhotoDomeUITests" */;
+			buildPhases = (
+				302BC38E4017C8EF576FB0B5 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				93B1A2A551E5B6F9BD2EED82 /* PBXTargetDependency */,
+			);
+			name = PhotoDomeUITests;
+			packageProductDependencies = (
+			);
+			productName = PhotoDomeUITests;
+			productReference = 5D4216088C611981B1893840 /* PhotoDomeUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		EA9F81D221C3B32EA5AA5701 /* PhotoDomeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7B14B89F53DA3EE38CD25A8A /* Build configuration list for PBXNativeTarget "PhotoDomeTests" */;
+			buildPhases = (
+				300E69DB4E4F17FA2B32FD05 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E441F41D1246B317E1BFF8BE /* PBXTargetDependency */,
+			);
+			name = PhotoDomeTests;
+			packageProductDependencies = (
+			);
+			productName = PhotoDomeTests;
+			productReference = 06FF816C1E04C4496B0D2A34 /* PhotoDomeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2A79AD63D312509FFAE6C9A1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					224CF0FFAC3D8545F40CCE7A = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					4C17B872E114394022E30C1E = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					7C8BA041448AC838CC4CB519 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+						TestTargetID = 4C17B872E114394022E30C1E;
+					};
+					EA9F81D221C3B32EA5AA5701 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = EC8A6710424F96A94BD98CCC /* Build configuration list for PBXProject "PhotoDome" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1E2A19CB8520BB4342B0C574;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FE561944A90136F4CF69E7D9 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */,
+				EC9F9B6DC75E318B413772FC /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */,
+				F4085C92483EB156CAD577D4 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 66944BEEDD1D9F50D8A1DD8B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4C17B872E114394022E30C1E /* PhotoDome */,
+				224CF0FFAC3D8545F40CCE7A /* PhotoDomeLiveActivity */,
+				EA9F81D221C3B32EA5AA5701 /* PhotoDomeTests */,
+				7C8BA041448AC838CC4CB519 /* PhotoDomeUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3699C1317D5D1CADF5CB7929 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05DC536792F62AFA0C528201 /* Assets.xcassets in Resources */,
+				35C7DBEA9A051263C6BCACE2 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9A4EC42AB1052321C8E44FE2 /* Validate Release Configuration */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Validate Release Configuration";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\nset -eu\n\nif [ \"${CONFIGURATION:-}\" != \"Release\" ]; then\n  exit 0\nfi\n\ncase \"${PHOTODOME_API_BASE_URL:-}\" in\n  https://*)\n    ;;\n  *)\n    echo \"error: Release builds require PHOTODOME_RELEASE_API_BASE_URL with an https:// URL.\" >&2\n    exit 1\n    ;;\nesac\n\ncase \"${PHOTODOME_API_BASE_URL}\" in\n  *localhost*|*127.0.0.1*|*.invalid*)\n    echo \"error: Release API URL must not target localhost or a reserved invalid domain.\" >&2\n    exit 1\n    ;;\nesac\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		025703D972929AF1BCFD005D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				554D509400DBC8417AF83268 /* APIClient.swift in Sources */,
+				DDB45AB6E7F8CFDFFB55B7E8 /* APIClientMiddleware.swift in Sources */,
+				A3890BEEF00088C8E3D39A46 /* APIHealthViewModel.swift in Sources */,
+				7C158913E4B50D294EE0824B /* AppConfiguration.swift in Sources */,
+				5DADCAE58AF82966929014FC /* AppDelegate.swift in Sources */,
+				B2866A37FF53397B7AE3F942 /* AppTheme.swift in Sources */,
+				779A97DDFEDE82D23491832C /* BackgroundUploadManager.swift in Sources */,
+				494AC70E83DDC617B066694F /* Client.swift in Sources */,
+				6E8A0BA3F57B3AAF5828486F /* ContentView.swift in Sources */,
+				514BEEB0806E5F3CE8BF5406 /* CreateEventView.swift in Sources */,
+				7598009EC70BB68A138F4223 /* DeviceProfile.swift in Sources */,
+				B89A15E2827068013B624BDF /* DisplayNameOnboardingView.swift in Sources */,
+				B1118C0C8019FE4E868DA474 /* EventActivityAttributes.swift in Sources */,
+				9716B9EFDEE820311A59B0D8 /* EventAlbumView.swift in Sources */,
+				C7F4FF437A3B9407288739B6 /* EventAlbumViewModel.swift in Sources */,
+				2366B38DF9E2CAD4EF142AAD /* EventAppViewModel.swift in Sources */,
+				F6D44D2E85EE6230D8A688CE /* EventCameraView.swift in Sources */,
+				AB1F7DA302692A07F888E8D5 /* EventDeepLink.swift in Sources */,
+				7381C4DB24406749EEF066E4 /* EventDetailView.swift in Sources */,
+				BEC6443B538451E91417C85F /* EventLiveActivityManager.swift in Sources */,
+				CAF1A825BF82592DB258DE42 /* EventModels.swift in Sources */,
+				210FAB290E98893A9BFA750C /* EventRealtimeClient.swift in Sources */,
+				3A4FE5819A86B2747DC00EC6 /* EventRepository.swift in Sources */,
+				46F3D76384F756F8F37DC3E1 /* EventTakeHomeView.swift in Sources */,
+				652325528BDE36FAC79D62E8 /* ImagePreprocessor.swift in Sources */,
+				E15E11D10706A835BD7BD211 /* InvitePayload.swift in Sources */,
+				DBF5B6804C516973FBE202FD /* JoinEventView.swift in Sources */,
+				5ADF1B088DA264EF315BC4AC /* KeychainCapabilityStore.swift in Sources */,
+				FEEDB63C2D36D5BD585B3287 /* PermissionCenter.swift in Sources */,
+				5198D53A68B2964D20450EBF /* PhotoDomeApp.swift in Sources */,
+				C1D1C6CA17DAD5E1FF1312B3 /* PhotoDomeComponents.swift in Sources */,
+				DB24CC9A1AF9C01952FBECFC /* PhotoDomeTokens.swift in Sources */,
+				5F724FF85017DCCAABC1137E /* PhotoDownloadManager.swift in Sources */,
+				FFC892CE8DC7B39126D11E22 /* PhotoDownloadQueueStore.swift in Sources */,
+				A2A42B0345FE1098C2530ABA /* PhotoLibraryWriter.swift in Sources */,
+				D543E352496E9F003FD33451 /* PhotoModels.swift in Sources */,
+				A98E7956AB6F205A63F6BB5B /* PhotoReviewView.swift in Sources */,
+				D84740D4277659F4B0889416 /* PhotoReviewViewModel.swift in Sources */,
+				F1EABAB461AA6712A920C7D9 /* PrivacyView.swift in Sources */,
+				96082CA1853A0FA6190665CC /* QRCodeView.swift in Sources */,
+				4B39A6C8A60A7E0EAE7582DB /* QRScannerView.swift in Sources */,
+				FDAD76FC65A6D1BF686A676C /* Types.swift in Sources */,
+				B421FC7168DB8E8A54A48B86 /* UploadQueueStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		300E69DB4E4F17FA2B32FD05 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D278CD527F922E0EC791FC7 /* APIClientIntegrationTests.swift in Sources */,
+				36834C5793452BB3AF11A557 /* AppConfigurationTests.swift in Sources */,
+				3E554E74AEAE046EC4507B5B /* AppThemeTests.swift in Sources */,
+				E8093805DC6F64372D422FC2 /* EventDeepLinkTests.swift in Sources */,
+				E3C44A99E69BCB53B9FF83FB /* InvitePayloadTests.swift in Sources */,
+				A384D5CC5B48E21502EE017F /* KeychainCapabilityStoreTests.swift in Sources */,
+				0ECA97CCB1EAFFD17B82E327 /* MediaPipelineTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		302BC38E4017C8EF576FB0B5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7DCF124EDBB970366BF3704D /* AccessibilityUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		72F4AF48A9A557FD5D04C8E8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1A58112DA66CE2CEFD391C8F /* EventActivityAttributes.swift in Sources */,
+				5B1B361D70C30E37939379BA /* EventLiveActivityWidget.swift in Sources */,
+				0FFFCF4356D3195D8B82AD56 /* PhotoDomeLiveActivityBundle.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		93B1A2A551E5B6F9BD2EED82 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4C17B872E114394022E30C1E /* PhotoDome */;
+			targetProxy = 415D4EF1175A124E97225B27 /* PBXContainerItemProxy */;
+		};
+		E441F41D1246B317E1BFF8BE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4C17B872E114394022E30C1E /* PhotoDome */;
+			targetProxy = 9A66C2AFDDBC7F8B1771773F /* PBXContainerItemProxy */;
+		};
+		FF558AD0908933B2B71E1C29 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 224CF0FFAC3D8545F40CCE7A /* PhotoDomeLiveActivity */;
+			targetProxy = 667E7DBC69C03D85A4BB1142 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0FC95CBF5B901E21F678CBE1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PhotoDome/PhotoDome.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PhotoDome/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PHOTODOME_API_BASE_URL = "$(PHOTODOME_RELEASE_API_BASE_URL)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.younger7jp.photodome;
+				PRODUCT_NAME = PhotoDome;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		15BB379E1B2BF607AF8EE032 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.younger7jp.photodome.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PhotoDome.app/PhotoDome";
+			};
+			name = Release;
+		};
+		1606E3976C6955DBB6305B89 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.younger7jp.photodome.ui-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = PhotoDome;
+			};
+			name = Release;
+		};
+		4F5E39CAC6A5BAE27355238A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PhotoDome/PhotoDome.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PhotoDome/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PHOTODOME_API_BASE_URL = "http://127.0.0.1:3000";
+				PRODUCT_BUNDLE_IDENTIFIER = com.younger7jp.photodome;
+				PRODUCT_NAME = PhotoDome;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		544AA82591F3C4327134BE4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PhotoDomeLiveActivity/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.younger7jp.photodome.live-activity";
+				PRODUCT_NAME = PhotoDomeLiveActivity;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		666574CA8D3F0F584866CF79 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.younger7jp.photodome.ui-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = PhotoDome;
+			};
+			name = Debug;
+		};
+		6E3A0DCC5D454BEED9629BAA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PhotoDomeLiveActivity/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.younger7jp.photodome.live-activity";
+				PRODUCT_NAME = PhotoDomeLiveActivity;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8B62A21E19C0304C589949DC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.younger7jp.photodome.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PhotoDome.app/PhotoDome";
+			};
+			name = Debug;
+		};
+		8EEF1015571C49DE2D682881 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		EEF10474F74A0F1C41E0D80D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7194FC84A55E11E80953EE17 /* Build configuration list for PBXNativeTarget "PhotoDomeLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6E3A0DCC5D454BEED9629BAA /* Debug */,
+				544AA82591F3C4327134BE4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		756021025D12D7A87C92E6DF /* Build configuration list for PBXNativeTarget "PhotoDomeUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				666574CA8D3F0F584866CF79 /* Debug */,
+				1606E3976C6955DBB6305B89 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7B14B89F53DA3EE38CD25A8A /* Build configuration list for PBXNativeTarget "PhotoDomeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8B62A21E19C0304C589949DC /* Debug */,
+				15BB379E1B2BF607AF8EE032 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AF38BDDC5F14A5CFD8D8D3B9 /* Build configuration list for PBXNativeTarget "PhotoDome" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F5E39CAC6A5BAE27355238A /* Debug */,
+				0FC95CBF5B901E21F678CBE1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EC8A6710424F96A94BD98CCC /* Build configuration list for PBXProject "PhotoDome" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EEF1015571C49DE2D682881 /* Debug */,
+				EEF10474F74A0F1C41E0D80D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EC9F9B6DC75E318B413772FC /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-openapi-urlsession";
+			requirement = {
+				kind = exactVersion;
+				version = 1.3.0;
+			};
+		};
+		F4085C92483EB156CAD577D4 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
+			requirement = {
+				kind = exactVersion;
+				version = 16.1.1;
+			};
+		};
+		FE561944A90136F4CF69E7D9 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-openapi-runtime";
+			requirement = {
+				kind = exactVersion;
+				version = 1.12.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		22987B7445E0A8B6698585DE /* OpenAPIRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE561944A90136F4CF69E7D9 /* XCRemoteSwiftPackageReference "swift-openapi-runtime" */;
+			productName = OpenAPIRuntime;
+		};
+		3A65F3081788D6AC695066BD /* SocketIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F4085C92483EB156CAD577D4 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */;
+			productName = SocketIO;
+		};
+		A095B2100352F80D00488243 /* OpenAPIURLSession */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EC9F9B6DC75E318B413772FC /* XCRemoteSwiftPackageReference "swift-openapi-urlsession" */;
+			productName = OpenAPIURLSession;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 2A79AD63D312509FFAE6C9A1 /* Project object */;
+}
