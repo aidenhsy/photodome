@@ -1,6 +1,10 @@
-name: Deploy API
+name: API CI and Deploy
 
 on:
+  pull_request:
+    paths:
+      - 'photodome-api/**'
+      - '.github/workflows/deploy.yml'
   push:
     branches: [main]
     paths:
@@ -9,8 +13,40 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  verify:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: photodome-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          cache: npm
+          cache-dependency-path: photodome-api/package-lock.json
+      # postgres + redis + fake-gcs; healthchecks make --wait meaningful.
+      # test:e2e:prepare runs the full migration chain against the fresh
+      # postgres, so migration-chain validation is covered by the e2e step.
+      - name: Start test services
+        run: docker compose up -d --wait
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run build
+      - run: npm run test
+      - run: npm run test:e2e
+      - name: Build production image
+        run: docker build -t photodome-api:ci .
+
+  deploy:
+    needs: verify
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
     steps:
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.0

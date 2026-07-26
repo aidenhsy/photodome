@@ -25,6 +25,25 @@ Before planning or implementing product work, read:
 - Host upload restriction blocks new reservations but must not cancel uploads that were already reserved/in progress.
 - Follow any more specific `AGENTS.md` added later in a subdirectory.
 
+## Repository workflow and releases
+
+- For any CI, environment, deployment, versioning, signing, TestFlight, or release
+  work, first read
+  `/Users/aidenyang/Documents/brain/10 Projects/photodome/reference/Deployment & Release.md`.
+- Work on short-lived `feat/…`, `fix/…`, `chore/…`, or `docs/…` branches from
+  current `origin/main`; never use `main` as the working branch. Open a PR, treat
+  CI (`API CI and Deploy` → `verify`) as authoritative, and squash-merge only
+  green PRs. Branch protection is unavailable on the current GitHub plan — the
+  no-direct-push rule is policy and must be enforced by humans and agents.
+- Merging to `main` deploys `photodome-api` to production automatically after a
+  green verify. New required environment variables must exist in the server
+  `.env` before merge, or startup fails closed.
+- Version and build numbers follow the vault's `Release Versioning.md` and are
+  set only in `photodome-ios/project.yml` (then `xcodegen generate`). Project
+  metadata edited directly in the pbxproj or Info.plist is lost on regeneration.
+- Exactly one vault note in `releases/` has `status: current`; rotate it per the
+  Deployment & Release runbook after every upload.
+
 ## Repository status
 
 This repository was initialized as an empty product workspace on 2026-07-25. The confirmed direction is an iPhone-only native Swift/SwiftUI client with a NestJS backend modeled on foodapp, including its Clean Architecture conventions, PostgreSQL/Prisma persistence, Redis/BullMQ jobs, Socket.IO realtime transport, OpenAPI-generated Swift client, private Google Cloud Storage media flow, and Pino logging. Exact package versions, hosting provider, and deployment process have not been selected.
