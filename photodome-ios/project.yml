@@ -57,6 +57,9 @@ targets:
         NSPhotoLibraryUsageDescription: Add photos from your library to this private event.
         NSPhotoLibraryAddUsageDescription: Save your selected event photos to your photo library.
         NSLocationWhenInUseUsageDescription: Add the precise shutter-time location to photos you share with a PhotoDome event.
+        # Standard HTTPS/TLS only — exempt encryption; without this key every
+        # uploaded build sits in "Missing Compliance" and TestFlight won't offer it.
+        ITSAppUsesNonExemptEncryption: false
         PhotoDomeAPIBaseURL: $(PHOTODOME_API_BASE_URL)
         NSSupportsLiveActivities: true
         CFBundleURLTypes:
