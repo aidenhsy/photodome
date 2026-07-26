@@ -9,7 +9,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    DEVELOPMENT_TEAM: ""
+    DEVELOPMENT_TEAM: 35Q36KU73C
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
@@ -76,6 +76,12 @@ targets:
         Release:
           PHOTODOME_RELEASE_API_BASE_URL: https://api.kindredarc.com
           PHOTODOME_API_BASE_URL: $(PHOTODOME_RELEASE_API_BASE_URL)
+    entitlements:
+      path: PhotoDome/PhotoDome.entitlements
+      properties:
+        # ActivityKit push-token updates require aps-environment; signing
+        # rewrites it to production in distribution builds.
+        aps-environment: development
     preBuildScripts:
       - path: Scripts/validate-release-configuration.sh
         name: Validate Release Configuration
