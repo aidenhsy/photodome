@@ -147,6 +147,22 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertEqual(result.label, "Tapped bottom")
     }
 
+    func testPendingAlbumPhotoIsSquareAndUsesOneUploadStatus() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestAlbumUploadTile")
+        app.launch()
+
+        let upload = app.otherElements[
+            "albumUpload.00000000-0000-0000-0000-000000000001"
+        ]
+        let frame = app.otherElements["albumUploadFrame"]
+        XCTAssertTrue(upload.waitForExistence(timeout: 5))
+        XCTAssertTrue(frame.exists)
+        XCTAssertEqual(upload.label, "Photo uploading")
+        XCTAssertEqual(frame.frame.width, frame.frame.height, accuracy: 1)
+    }
+
     func testInviteOffersCopyWithVisibleConfirmationButNotShare() {
         continueAfterFailure = false
         app = XCUIApplication()
