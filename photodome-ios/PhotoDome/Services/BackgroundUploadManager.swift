@@ -62,14 +62,19 @@ final class BackgroundUploadManager: NSObject, ObservableObject {
         data: Data,
         access: StoredEventAccess,
         capturedAt: Date? = nil,
-        captureLocation: PhotoCaptureLocation? = nil
+        captureLocation: PhotoCaptureLocation? = nil,
+        itemID: UUID = UUID()
     ) async throws {
         let prepared = try await preprocessor.prepare(
             data,
             capturedAt: capturedAt,
             captureLocation: captureLocation
         )
-        try await enqueue(prepared: prepared, access: access)
+        try await enqueue(
+            prepared: prepared,
+            access: access,
+            itemID: itemID
+        )
     }
 
     func prepare(
@@ -86,7 +91,8 @@ final class BackgroundUploadManager: NSObject, ObservableObject {
 
     func enqueue(
         prepared: PreparedPhoto,
-        access: StoredEventAccess
+        access: StoredEventAccess,
+        itemID: UUID = UUID()
     ) async throws {
         await configure()
         guard let api else {
@@ -101,7 +107,7 @@ final class BackgroundUploadManager: NSObject, ObservableObject {
                 prepared: prepared
             )
             var item = UploadQueueItem(
-                id: UUID(),
+                id: itemID,
                 eventID: access.id,
                 photoID: grant.photoID,
                 uploadSessionURL: grant.uploadURL,

@@ -129,8 +129,9 @@ final class EventAlbumViewModel: ObservableObject {
         data: Data,
         capturedAt: Date? = nil,
         captureLocation: PhotoCaptureLocation? = nil,
-        saveToLibrary: Bool = false
-    ) async {
+        saveToLibrary: Bool = false,
+        uploadID: UUID = UUID()
+    ) async -> Bool {
         do {
             if saveToLibrary {
                 guard captureLocation != nil else {
@@ -149,7 +150,8 @@ final class EventAlbumViewModel: ObservableObject {
                     )
                     try await BackgroundUploadManager.shared.enqueue(
                         prepared: prepared,
-                        access: access
+                        access: access,
+                        itemID: uploadID
                     )
                 } catch {
                     try? FileManager.default.removeItem(
@@ -157,17 +159,20 @@ final class EventAlbumViewModel: ObservableObject {
                     )
                     throw error
                 }
-                return
+                return true
             }
 
             try await BackgroundUploadManager.shared.enqueue(
                 data: data,
                 access: access,
                 capturedAt: capturedAt,
-                captureLocation: captureLocation
+                captureLocation: captureLocation,
+                itemID: uploadID
             )
+            return true
         } catch {
             presentedError = error.photoDomeMessage
+            return false
         }
     }
 
