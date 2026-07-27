@@ -68,7 +68,8 @@ enum AttendeeManagementPolicy {
 enum EventTimestampFormatter {
     static func localDateTime(
         _ value: String?,
-        timeZone: TimeZone = .current
+        timeZone: TimeZone = .current,
+        locale: Locale = .current
     ) -> String? {
         guard let value else { return nil }
 
@@ -91,10 +92,37 @@ enum EventTimestampFormatter {
             time: .shortened
         )
         style.timeZone = timeZone
-        let timestamp = date.formatted(style)
-        guard let abbreviation = timeZone.abbreviation(for: date) else {
-            return timestamp
+        let timestamp = date.formatted(style.locale(locale))
+        let timeZoneName = localTimeZoneName(
+            timeZone,
+            locale: locale
+        )
+        return "\(timestamp) (\(timeZoneName))"
+    }
+
+    private static func localTimeZoneName(
+        _ timeZone: TimeZone,
+        locale: Locale
+    ) -> String {
+        guard
+            let name = timeZone.localizedName(
+                for: .generic,
+                locale: locale
+            )
+        else {
+            return String(localized: "local time", locale: locale)
         }
-        return "\(timestamp) \(abbreviation)"
+
+        let normalizedName =
+            name
+            .replacingOccurrences(of: "\u{2212}", with: "-")
+            .uppercased()
+        let exposesNumericOffset =
+            normalizedName.hasPrefix("GMT+") || normalizedName.hasPrefix("GMT-")
+            || normalizedName.hasPrefix("UTC+") || normalizedName.hasPrefix("UTC-")
+
+        return exposesNumericOffset
+            ? String(localized: "local time", locale: locale)
+            : name
     }
 }
