@@ -198,7 +198,6 @@ export class PrismaCurationRepository implements CurationRepository {
       input.eventId,
       input.memberId,
       input.now,
-      input.allowLive,
     );
     const where: Prisma.PhotoWhereInput = {
       eventId: input.eventId,
@@ -247,22 +246,18 @@ export class PrismaCurationRepository implements CurationRepository {
     eventId: string,
     memberId: string,
     now: Date,
-    allowLive = false,
   ): Promise<void> {
     const member = await transaction.eventMember.findFirst({
       where: {
         id: memberId,
         eventId,
         removedAt: null,
-        event: allowLive
-          ? {
-              state: { in: [EventState.LIVE, EventState.ENDED] },
-              OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-            }
-          : {
-              state: EventState.ENDED,
-              expiresAt: { gt: now },
-            },
+        event: {
+          OR: [
+            { state: EventState.LIVE },
+            { state: EventState.ENDED, expiresAt: { gt: now } },
+          ],
+        },
       },
       select: { id: true },
     });

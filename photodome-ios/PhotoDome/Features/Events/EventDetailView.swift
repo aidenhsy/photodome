@@ -39,9 +39,9 @@ struct EventDetailView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         summary(access)
 
-                        if access.event.state == .ended,
-                            (access.event.readyPhotoCount ?? 0) > 0
-                        {
+                        if EventTakeHomePolicy.isAvailable(
+                            for: access.event
+                        ) {
                             EventTakeHomeView(access: access)
                         }
 

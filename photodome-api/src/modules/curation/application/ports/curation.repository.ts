@@ -33,7 +33,6 @@ export interface CurationRepository {
     cursor: string | null;
     limit: number;
     photoId: string | null;
-    allowLive: boolean;
     now: Date;
   }): Promise<ManifestPhotoPage>;
 }

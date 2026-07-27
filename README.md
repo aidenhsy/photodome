@@ -1,6 +1,6 @@
 # PhotoDome
 
-PhotoDome is a shared event-photo app. An accountless host creates an event and shares a QR code or short code; accountless guests join the live album, contribute photos from the camera or camera roll, and see everyone else's photos as the event unfolds. The host ends the live event, but uploads remain open unless the host restricts them. Everyone has seven days after the event ends to contribute, download the full album, or swipe through it to keep only the photos they want.
+PhotoDome is a shared event-photo app. An accountless host creates an event and shares a QR code or short code; accountless guests join the live album, contribute photos from the camera or camera roll, and see everyone else's photos as the event unfolds. Once photos are ready, every participant can save the current set or privately swipe-select without waiting for the host. The host ends the live event, but uploads remain open unless the host restricts them; take-home remains available throughout the seven-day post-end window.
 
 ## Project documentation
 

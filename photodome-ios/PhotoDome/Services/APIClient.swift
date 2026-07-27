@@ -28,7 +28,7 @@ enum APIClientError: LocalizedError, Equatable {
         case .uploadsClosed:
             "This event is not accepting new photo uploads."
         case .curationUnavailable:
-            "Photo take-home is available after the event ends and before it expires."
+            "Photo take-home is unavailable because this event has expired."
         case .invalidMedia:
             "That photo upload could not be verified."
         case .unexpectedStatus(let status):

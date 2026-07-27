@@ -113,11 +113,28 @@ describe('Private curation and original download (e2e)', () => {
     expect(liveHostDownload.photos.map((photo) => photo.id)).toEqual([
       liveGuestPhoto,
     ]);
-    await request(server)
-      .get(`${path}/download-manifest`)
-      .set('Authorization', `Bearer ${guestOne.capability}`)
-      .query({ mode: 'all' })
-      .expect(409);
+
+    const liveGuestDownload = await manifest(
+      server,
+      path,
+      guestOne.capability,
+      'all',
+    );
+    expect(liveGuestDownload.photos.map((photo) => photo.id)).toEqual([
+      livePhoto,
+    ]);
+
+    const liveReview = (
+      await request(server)
+        .get(`${path}/selections/review`)
+        .set('Authorization', `Bearer ${guestOne.capability}`)
+        .expect(200)
+    ).body as { photos: Array<{ id: string }> };
+    expect(liveReview.photos.map((photo) => photo.id)).toEqual([livePhoto]);
+
+    await setSelection(server, path, guestOne.capability, livePhoto, 'KEEP');
+    const liveKept = await manifest(server, path, guestOne.capability, 'kept');
+    expect(liveKept.photos.map((photo) => photo.id)).toEqual([livePhoto]);
 
     await request(server)
       .delete(`${path}/photos/${liveGuestPhoto}`)
@@ -128,10 +145,6 @@ describe('Private curation and original download (e2e)', () => {
       .set('Authorization', `Bearer ${host.capability}`)
       .expect(204);
 
-    await request(server)
-      .get(`${path}/selections/review`)
-      .set('Authorization', `Bearer ${guestOne.capability}`)
-      .expect(409);
     await request(server)
       .post(`${path}/end`)
       .set('Authorization', `Bearer ${host.capability}`)

@@ -11,15 +11,15 @@ struct EventTakeHomeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                if access.event.state == .ended {
-                    Button {
-                        showsReview = true
-                    } label: {
-                        Label("Choose photos", systemImage: "hand.draw")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(OutlineButtonStyle())
+                Button {
+                    showsReview = true
+                } label: {
+                    actionLabel(
+                        "Choose photos",
+                        systemImage: "hand.draw"
+                    )
                 }
+                .buttonStyle(OutlineButtonStyle())
 
                 Button {
                     Task { await saveAll() }
@@ -28,8 +28,12 @@ struct EventTakeHomeView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                     } else {
-                        Label("Save all", systemImage: "square.and.arrow.down")
-                            .frame(maxWidth: .infinity)
+                        actionLabel(
+                            EventTakeHomePolicy.saveAllLabel(
+                                for: access.event.state
+                            ),
+                            systemImage: "square.and.arrow.down"
+                        )
                     }
                 }
                 .buttonStyle(MonochromeButtonStyle())
@@ -53,6 +57,34 @@ struct EventTakeHomeView: View {
         } message: {
             Text(presentedError ?? "")
         }
+    }
+
+    private func actionLabel(
+        _ title: String,
+        systemImage: String
+    ) -> some View {
+        ViewThatFits(in: .horizontal) {
+            Label(title, systemImage: systemImage)
+                .fixedSize(horizontal: true, vertical: false)
+
+            Text(title)
+                .fixedSize(horizontal: true, vertical: false)
+
+            Text(title)
+                .font(
+                    .system(
+                        .subheadline,
+                        design: .rounded,
+                        weight: .semibold
+                    )
+                )
+                .minimumScaleFactor(0.65)
+        }
+        .lineLimit(1)
+        .allowsTightening(true)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
     }
 
     @ViewBuilder
@@ -146,4 +178,15 @@ struct EventTakeHomeView: View {
         }
     }
 
+}
+
+enum EventTakeHomePolicy {
+    static func isAvailable(for event: EventSnapshot) -> Bool {
+        guard (event.readyPhotoCount ?? 0) > 0 else { return false }
+        return event.state == .live || event.state == .ended
+    }
+
+    static func saveAllLabel(for lifecycle: EventLifecycle) -> String {
+        lifecycle == .live ? "Save current photos" : "Save all"
+    }
 }

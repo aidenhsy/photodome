@@ -138,7 +138,6 @@ export class CurationApplicationService {
       cursor,
       limit,
       photoId,
-      allowLive: photoId !== null || (access.role === 'HOST' && mode === 'ALL'),
       now,
     });
     const photos = await Promise.all(
