@@ -8,6 +8,7 @@ struct EventAlbumView: View {
     @ObservedObject private var uploads: BackgroundUploadManager
     @ObservedObject private var downloads: PhotoDownloadManager
     @State private var selections: [PhotosPickerItem] = []
+    @State private var preparingUploads: [PreparingAlbumPhoto] = []
     @State private var showsCamera: Bool
     let cameraPresentationRequestID: UUID?
     @State private var photoPendingRemoval: AlbumPhoto?
@@ -61,9 +62,7 @@ struct EventAlbumView: View {
                     .foregroundStyle(AppTheme.secondaryInk)
             }
 
-            uploadStatus
-
-            if model.photos.isEmpty, !model.isLoading {
+            if !hasAlbumContent, !model.isLoading {
                 ContentUnavailableView(
                     "No photos yet",
                     systemImage: "photo.on.rectangle.angled",
@@ -91,6 +90,18 @@ struct EventAlbumView: View {
                     ],
                     spacing: PhotoDomeTokens.Space.x1
                 ) {
+                    ForEach(visiblePreparingUploads) { photo in
+                        PreparingPhotoGridCell(photo: photo)
+                    }
+
+                    ForEach(visibleEventUploads) { item in
+                        UploadPhotoGridCell(item: item) {
+                            Task {
+                                await uploads.retry(itemID: item.id)
+                            }
+                        }
+                    }
+
                     ForEach(model.photos) { photo in
                         AlbumGridCell(photoID: photo.id) {
                             handlePhotoTap(photo)
@@ -134,14 +145,12 @@ struct EventAlbumView: View {
                 capturedAt,
                 captureLocation,
                 isNewCapture in
-                Task {
-                    await model.addPhoto(
-                        data: data,
-                        capturedAt: capturedAt,
-                        captureLocation: captureLocation,
-                        saveToLibrary: isNewCapture
-                    )
-                }
+                startOptimisticUpload(
+                    data: data,
+                    capturedAt: capturedAt,
+                    captureLocation: captureLocation,
+                    saveToLibrary: isNewCapture
+                )
             }
         }
         .onDisappear { model.disconnect() }
@@ -171,7 +180,7 @@ struct EventAlbumView: View {
                     else {
                         continue
                     }
-                    await model.addPhoto(data: data)
+                    startOptimisticUpload(data: data)
                 }
             }
         }
@@ -345,6 +354,66 @@ struct EventAlbumView: View {
             && model.access.event.uploadsRestrictedAt == nil
     }
 
+    private var eventQueueItems: [UploadQueueItem] {
+        uploads.items.filter { $0.eventID == model.access.id }
+    }
+
+    private var visibleEventUploads: [UploadQueueItem] {
+        AlbumUploadGridPolicy.visibleQueueItems(
+            eventID: model.access.id,
+            readyPhotoIDs: Set(model.photos.map(\.id)),
+            allItems: uploads.items
+        )
+    }
+
+    private var visiblePreparingUploads: [PreparingAlbumPhoto] {
+        let visibleIDs = AlbumUploadGridPolicy.visiblePreparingIDs(
+            preparingUploads.map(\.id),
+            eventQueueItems: eventQueueItems
+        )
+        let photosByID = Dictionary(
+            uniqueKeysWithValues: preparingUploads.map { ($0.id, $0) }
+        )
+        return visibleIDs.compactMap {
+            photosByID[$0]
+        }
+    }
+
+    private var hasAlbumContent: Bool {
+        !model.photos.isEmpty
+            || !visibleEventUploads.isEmpty
+            || !visiblePreparingUploads.isEmpty
+    }
+
+    private func startOptimisticUpload(
+        data: Data,
+        capturedAt: Date? = nil,
+        captureLocation: PhotoCaptureLocation? = nil,
+        saveToLibrary: Bool = false
+    ) {
+        let uploadID = UUID()
+        guard let image = UIImage(data: data) else {
+            model.presentedError =
+                ImagePreprocessorError.unreadable
+                .localizedDescription
+            return
+        }
+        preparingUploads.append(
+            PreparingAlbumPhoto(id: uploadID, image: image)
+        )
+
+        Task {
+            _ = await model.addPhoto(
+                data: data,
+                capturedAt: capturedAt,
+                captureLocation: captureLocation,
+                saveToLibrary: saveToLibrary,
+                uploadID: uploadID
+            )
+            preparingUploads.removeAll { $0.id == uploadID }
+        }
+    }
+
     @ViewBuilder
     private func photoBadges(_ photo: AlbumPhoto) -> some View {
         let isYours =
@@ -363,77 +432,177 @@ struct EventAlbumView: View {
             }
         }
     }
+}
+
+private struct PreparingAlbumPhoto: Identifiable {
+    let id: UUID
+    let image: UIImage
+}
+
+private struct PreparingPhotoGridCell: View {
+    let photo: PreparingAlbumPhoto
+
+    var body: some View {
+        ZStack {
+            Image(uiImage: photo.image)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            UploadPhotoOverlay(state: nil)
+        }
+        .aspectRatio(1, contentMode: .fit)
+        .clipped()
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Photo preparing to upload")
+        .accessibilityIdentifier("albumUpload.\(photo.id.uuidString)")
+    }
+}
+
+private struct UploadPhotoGridCell: View {
+    let item: UploadQueueItem
+    let retry: () -> Void
 
     @ViewBuilder
-    private var uploadStatus: some View {
-        let eventUploads = uploads.items.filter {
-            $0.eventID == model.access.id
+    var body: some View {
+        if item.state == .failed {
+            Button(action: retry) {
+                content
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(accessibilityLabel)
+            .accessibilityHint("Tap to retry this upload.")
+            .accessibilityIdentifier(
+                "albumUpload.\(item.id.uuidString)"
+            )
+        } else {
+            content
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(accessibilityLabel)
+                .accessibilityHint(
+                    "The photo will become available when processing finishes."
+                )
+                .accessibilityIdentifier(
+                    "albumUpload.\(item.id.uuidString)"
+                )
         }
-        if !eventUploads.isEmpty {
-            VStack(spacing: 10) {
-                ForEach(eventUploads) { item in
-                    HStack(spacing: 12) {
-                        Image(systemName: icon(for: item.state))
-                            .frame(width: 24)
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(label(for: item.state))
-                                .font(
-                                    .system(
-                                        .subheadline,
-                                        design: .rounded,
-                                        weight: .semibold
-                                    )
-                                )
-                            if item.state == .uploading {
-                                ProgressView(value: item.progress)
-                                    .tint(AppTheme.ink)
-                                    .accessibilityLabel("Upload progress")
-                                    .accessibilityValue(
-                                        "\(Int(item.progress * 100)) percent"
-                                    )
-                            } else if let failure = item.failureMessage {
-                                Text(failure)
-                                    .font(.caption)
-                                    .foregroundStyle(AppTheme.secondaryInk)
-                            }
-                        }
-                        Spacer()
-                        if item.state == .failed {
-                            Button("Retry") {
-                                Task {
-                                    await uploads.retry(itemID: item.id)
-                                }
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(AppTheme.ink)
-                        }
-                    }
+    }
+
+    private var content: some View {
+        ZStack {
+            LocalAlbumThumbnail(fileURL: item.localFileURL)
+            UploadPhotoOverlay(state: item.state)
+        }
+        .contentShape(Rectangle())
+    }
+
+    private var accessibilityLabel: String {
+        switch item.state {
+        case .uploading:
+            "Photo uploading"
+        case .verifying:
+            "Photo upload verifying"
+        case .processing:
+            "Photo processing"
+        case .failed:
+            "Photo upload failed"
+        }
+    }
+}
+
+private struct UploadPhotoOverlay: View {
+    let state: UploadQueueState?
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.26)
+
+            if state == .failed {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(.title3, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .background(.black.opacity(0.72), in: Circle())
+            } else {
+                ProgressView()
+                    .controlSize(.regular)
+                    .tint(.white)
+                    .frame(width: 44, height: 44)
+                    .background(.black.opacity(0.58), in: Circle())
+            }
+
+            VStack {
+                Spacer()
+                HStack {
+                    PhotoStatusBadge(
+                        title: label,
+                        systemImage: icon
+                    )
+                    Spacer(minLength: 0)
+                }
+                .padding(6)
+            }
+        }
+    }
+
+    private var label: String {
+        switch state {
+        case nil:
+            "Preparing"
+        case .uploading:
+            "Uploading"
+        case .verifying:
+            "Verifying"
+        case .processing:
+            "Processing"
+        case .failed:
+            "Tap to retry"
+        }
+    }
+
+    private var icon: String {
+        switch state {
+        case nil:
+            "photo"
+        case .uploading:
+            "arrow.up"
+        case .verifying:
+            "checkmark.shield"
+        case .processing:
+            "wand.and.stars"
+        case .failed:
+            "exclamationmark.circle"
+        }
+    }
+}
+
+private struct LocalAlbumThumbnail: View {
+    let fileURL: URL
+    @State private var image: UIImage?
+
+    var body: some View {
+        Rectangle()
+            .fill(AppTheme.softFill)
+            .aspectRatio(1, contentMode: .fit)
+            .overlay {
+                if let image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    ProgressView()
                 }
             }
-            .padding(14)
-            .background(AppTheme.softFill)
-            .clipShape(
-                RoundedRectangle(cornerRadius: AppTheme.cornerRadius)
-            )
-        }
+            .clipped()
+            .task(id: fileURL) {
+                image = await Self.loadImage(at: fileURL)
+            }
     }
 
-    private func label(for state: UploadQueueState) -> String {
-        switch state {
-        case .uploading: "Uploading"
-        case .verifying: "Verifying"
-        case .processing: "Preparing for the album"
-        case .failed: "Upload needs attention"
-        }
-    }
-
-    private func icon(for state: UploadQueueState) -> String {
-        switch state {
-        case .uploading: "arrow.up.circle"
-        case .verifying: "checkmark.shield"
-        case .processing: "wand.and.stars"
-        case .failed: "exclamationmark.circle"
-        }
+    private static func loadImage(at fileURL: URL) async -> UIImage? {
+        await Task.detached(priority: .userInitiated) {
+            UIImage(contentsOfFile: fileURL.path)
+        }.value
     }
 }
 

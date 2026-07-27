@@ -169,3 +169,32 @@ struct UploadQueueItem: Codable, Identifiable, Equatable, Sendable {
         return min(1, Double(bytesSent) / Double(byteSize))
     }
 }
+
+enum AlbumUploadGridPolicy {
+    static func visibleQueueItems(
+        eventID: String,
+        readyPhotoIDs: Set<String>,
+        allItems: [UploadQueueItem]
+    ) -> [UploadQueueItem] {
+        Array(
+            allItems
+                .filter {
+                    $0.eventID == eventID
+                        && !readyPhotoIDs.contains($0.photoID)
+                }
+                .reversed()
+        )
+    }
+
+    static func visiblePreparingIDs(
+        _ preparingIDs: [UUID],
+        eventQueueItems: [UploadQueueItem]
+    ) -> [UUID] {
+        let queuedIDs = Set(eventQueueItems.map(\.id))
+        return Array(
+            preparingIDs
+                .filter { !queuedIDs.contains($0) }
+                .reversed()
+        )
+    }
+}
