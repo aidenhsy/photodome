@@ -11,15 +11,13 @@ struct EventTakeHomeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                if access.event.state == .ended {
-                    Button {
-                        showsReview = true
-                    } label: {
-                        Label("Choose photos", systemImage: "hand.draw")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(OutlineButtonStyle())
+                Button {
+                    showsReview = true
+                } label: {
+                    Label("Choose photos", systemImage: "hand.draw")
+                        .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(OutlineButtonStyle())
 
                 Button {
                     Task { await saveAll() }
@@ -28,8 +26,13 @@ struct EventTakeHomeView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                     } else {
-                        Label("Save all", systemImage: "square.and.arrow.down")
-                            .frame(maxWidth: .infinity)
+                        Label(
+                            EventTakeHomePolicy.saveAllLabel(
+                                for: access.event.state
+                            ),
+                            systemImage: "square.and.arrow.down"
+                        )
+                        .frame(maxWidth: .infinity)
                     }
                 }
                 .buttonStyle(MonochromeButtonStyle())
@@ -146,4 +149,15 @@ struct EventTakeHomeView: View {
         }
     }
 
+}
+
+enum EventTakeHomePolicy {
+    static func isAvailable(for event: EventSnapshot) -> Bool {
+        guard (event.readyPhotoCount ?? 0) > 0 else { return false }
+        return event.state == .live || event.state == .ended
+    }
+
+    static func saveAllLabel(for lifecycle: EventLifecycle) -> String {
+        lifecycle == .live ? "Save current photos" : "Save all"
+    }
 }

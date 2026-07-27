@@ -22,7 +22,7 @@ export class CurationExceptionFilter implements ExceptionFilter<CurationDomainEr
     const mapped =
       exception instanceof CurationUnavailableError
         ? new ConflictException(
-            'Photo take-home is available only during an ended event window.',
+            'Photo take-home is unavailable because this event has expired.',
           )
         : new NotFoundException('This photo is unavailable.');
     response.status(mapped.getStatus()).json(mapped.getResponse());
