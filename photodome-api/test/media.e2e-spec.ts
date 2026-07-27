@@ -100,6 +100,7 @@ describe('Direct media upload and live album (e2e)', () => {
     const guest = (
       await request(server)
         .post('/v1/events/join')
+        .set('X-PhotoDome-Installation-ID', 'media-guest-installation')
         .send({ joinCode: host.joinCode, displayName: 'Album Guest' })
         .expect(200)
     ).body as EventAccessBody;

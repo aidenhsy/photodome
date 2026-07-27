@@ -1,6 +1,17 @@
 import SwiftUI
 @preconcurrency import VisionKit
 
+@MainActor
+final class QRScanSubmissionGate {
+    private(set) var hasSubmitted = false
+
+    func claim() -> Bool {
+        guard !hasSubmitted else { return false }
+        hasSubmitted = true
+        return true
+    }
+}
+
 struct QRScannerView: View {
     let onPayload: (InvitePayload) -> Void
     @Environment(\.dismiss) private var dismiss
@@ -80,6 +91,7 @@ private struct DataScannerRepresentable: UIViewControllerRepresentable {
     @MainActor
     final class Coordinator: NSObject, DataScannerViewControllerDelegate {
         private let onCode: (String) -> Void
+        private let submissionGate = QRScanSubmissionGate()
 
         init(onCode: @escaping (String) -> Void) {
             self.onCode = onCode
@@ -97,6 +109,8 @@ private struct DataScannerRepresentable: UIViewControllerRepresentable {
                 else {
                     continue
                 }
+                guard submissionGate.claim() else { return }
+                dataScanner.stopScanning()
                 onCode(value)
                 break
             }

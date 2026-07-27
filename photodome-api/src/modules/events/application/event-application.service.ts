@@ -78,15 +78,25 @@ export class EventApplicationService {
   async joinEvent(input: {
     joinCode: string;
     displayName: string;
+    installationIdentity: string;
   }): Promise<EventAccessGrant> {
-    const capability = this.capabilities.generateEventCapability();
-    const event = await this.events.joinEvent({
+    const capability = this.capabilities.deriveGuestCapability(
+      input.joinCode,
+      input.installationIdentity,
+    );
+    const joined = await this.events.joinEvent({
       joinCodeHash: this.capabilities.hashJoinCode(input.joinCode),
       guestDisplayName: input.displayName.trim(),
       guestCapabilityHash: this.capabilities.hashCapability(capability),
+      guestJoinBindingHash: this.capabilities.hashGuestJoinBinding(
+        input.joinCode,
+        input.installationIdentity,
+      ),
     });
-    this.realtime.memberJoined(event.id, event.viewer.memberId);
-    return { event, capability };
+    if (joined.memberWasCreated) {
+      this.realtime.memberJoined(joined.event.id, joined.event.viewer.memberId);
+    }
+    return { event: joined.event, capability };
   }
 
   getSnapshot(eventId: string, memberId: string): Promise<EventSnapshot> {

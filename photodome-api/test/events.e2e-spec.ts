@@ -91,6 +91,7 @@ describe('Accountless event spine (e2e)', () => {
     )}-${created.joinCode.slice(4)}`;
     const joinedResponse = await request(server)
       .post('/v1/events/join')
+      .set('X-PhotoDome-Installation-ID', 'taylor-installation')
       .send({ joinCode: formattedCode, displayName: 'Taylor' })
       .expect(200);
     const joined = joinedResponse.body as EventAccessBody;
@@ -118,6 +119,51 @@ describe('Accountless event spine (e2e)', () => {
     expect(guestSnapshot.viewer.role).toBe('GUEST');
   });
 
+  it('makes concurrent join retries from one installation idempotent', async () => {
+    const host = (
+      await request(server)
+        .post('/v1/events')
+        .send({ name: 'One scan, one guest', displayName: 'Host' })
+        .expect(201)
+    ).body as HostEventAccessBody;
+
+    const join = () =>
+      request(server)
+        .post('/v1/events/join')
+        .set('X-PhotoDome-Installation-ID', 'angel-installation')
+        .send({ joinCode: host.joinCode, displayName: 'Angel' })
+        .expect(200);
+    const [firstResponse, retryResponse] = await Promise.all([join(), join()]);
+    const first = firstResponse.body as EventAccessBody;
+    const retry = retryResponse.body as EventAccessBody;
+
+    expect(retry.capability).toBe(first.capability);
+    expect(retry.event.viewer.memberId).toBe(first.event.viewer.memberId);
+    expect(first.event.memberCount).toBe(2);
+    expect(retry.event.memberCount).toBe(2);
+    await expect(
+      prisma.eventMember.count({
+        where: {
+          eventId: host.event.id,
+          role: 'GUEST',
+          removedAt: null,
+        },
+      }),
+    ).resolves.toBe(1);
+
+    await request(server)
+      .delete(
+        `/v1/events/${host.event.id}/members/${first.event.viewer.memberId}`,
+      )
+      .set('Authorization', `Bearer ${host.capability}`)
+      .expect(204);
+    const rejoined = (await join()).body as EventAccessBody;
+    expect(rejoined.event.viewer.memberId).not.toBe(
+      first.event.viewer.memberId,
+    );
+    expect(rejoined.event.memberCount).toBe(2);
+  });
+
   it('rotates public invites without revoking existing members', async () => {
     const created = (
       await request(server)
@@ -128,6 +174,7 @@ describe('Accountless event spine (e2e)', () => {
     const guest = (
       await request(server)
         .post('/v1/events/join')
+        .set('X-PhotoDome-Installation-ID', 'sam-installation')
         .send({ joinCode: created.joinCode, displayName: 'Sam' })
         .expect(200)
     ).body as EventAccessBody;
@@ -146,10 +193,12 @@ describe('Accountless event spine (e2e)', () => {
     expect(rotated.joinCode).not.toBe(created.joinCode);
     await request(server)
       .post('/v1/events/join')
+      .set('X-PhotoDome-Installation-ID', 'old-code-installation')
       .send({ joinCode: created.joinCode, displayName: 'Jordan' })
       .expect(404);
     await request(server)
       .post('/v1/events/join')
+      .set('X-PhotoDome-Installation-ID', 'new-code-installation')
       .send({ joinCode: rotated.joinCode, displayName: 'Jordan' })
       .expect(200);
     await request(server)
@@ -244,6 +293,7 @@ describe('Accountless event spine (e2e)', () => {
     const guest = (
       await request(server)
         .post('/v1/events/join')
+        .set('X-PhotoDome-Installation-ID', 'riley-installation')
         .send({ joinCode: host.joinCode, displayName: 'Riley' })
         .expect(200)
     ).body as EventAccessBody;
@@ -404,6 +454,10 @@ describe('Accountless event spine (e2e)', () => {
       const guest = (
         await request(server)
           .post('/v1/events/join')
+          .set(
+            'X-PhotoDome-Installation-ID',
+            `restriction-race-installation-${attempt}`,
+          )
           .send({ joinCode: host.joinCode, displayName: 'Race Guest' })
           .expect(200)
       ).body as EventAccessBody;

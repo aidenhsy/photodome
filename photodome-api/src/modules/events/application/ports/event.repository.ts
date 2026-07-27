@@ -8,6 +8,11 @@ export interface CreatedEvent {
   event: EventSnapshot;
 }
 
+export interface JoinedEvent {
+  event: EventSnapshot;
+  memberWasCreated: boolean;
+}
+
 export interface EventRepository {
   createEvent(input: {
     name: string;
@@ -20,7 +25,8 @@ export interface EventRepository {
     joinCodeHash: string;
     guestDisplayName: string;
     guestCapabilityHash: string;
-  }): Promise<EventSnapshot>;
+    guestJoinBindingHash: string;
+  }): Promise<JoinedEvent>;
   getSnapshot(eventId: string, memberId: string): Promise<EventSnapshot>;
   listActiveMemberCredentials(
     eventId: string,

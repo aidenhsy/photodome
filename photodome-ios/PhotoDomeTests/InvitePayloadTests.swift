@@ -29,4 +29,13 @@ final class InvitePayloadTests: XCTestCase {
             )
         )
     }
+
+    @MainActor
+    func testQRScanSubmissionGateAcceptsOnlyTheFirstDetection() {
+        let gate = QRScanSubmissionGate()
+
+        XCTAssertTrue(gate.claim())
+        XCTAssertFalse(gate.claim())
+        XCTAssertTrue(gate.hasSubmitted)
+    }
 }

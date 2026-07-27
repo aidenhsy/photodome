@@ -14,6 +14,8 @@ export interface CapabilityCodec {
   hashCapability(value: string): string;
   hashTransferToken(value: string): string;
   hashJoinCode(value: string): string;
+  deriveGuestCapability(joinCode: string, installationIdentity: string): string;
+  hashGuestJoinBinding(joinCode: string, installationIdentity: string): string;
   matchesHash(candidateHash: string, storedHash: string): boolean;
 }
 

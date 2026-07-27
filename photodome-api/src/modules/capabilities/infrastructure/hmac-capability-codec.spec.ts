@@ -33,4 +33,26 @@ describe('HmacCapabilityCodec', () => {
       codec.matchesHash(codec.hashCapability('different'), capabilityHash),
     ).toBe(false);
   });
+
+  it('derives stable guest enrollment material for one join code and installation', () => {
+    const firstCapability = codec.deriveGuestCapability(
+      'ABCD2345',
+      'angel-installation',
+    );
+    const retryCapability = codec.deriveGuestCapability(
+      'ABCD-2345',
+      'angel-installation',
+    );
+    const otherInstallation = codec.deriveGuestCapability(
+      'ABCD2345',
+      'other-installation',
+    );
+
+    expect(firstCapability).toMatch(/^pdc_[A-Za-z0-9_-]{43}$/);
+    expect(retryCapability).toBe(firstCapability);
+    expect(otherInstallation).not.toBe(firstCapability);
+    expect(
+      codec.hashGuestJoinBinding('ABCD2345', 'angel-installation'),
+    ).not.toBe(codec.hashGuestJoinBinding('ABCD2345', 'other-installation'));
+  });
 });
