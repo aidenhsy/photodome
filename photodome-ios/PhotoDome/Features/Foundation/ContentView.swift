@@ -238,23 +238,10 @@ struct ContentView: View {
         }
     }
 
-    @ViewBuilder
     private var emptyState: some View {
-        VStack(alignment: .leading, spacing: PhotoDomeTokens.Space.x2) {
-            Text(
-                model.archivedEvents.isEmpty
-                    ? "No events yet."
-                    : "No events in Your Events."
-            )
-            if !model.archivedEvents.isEmpty {
-                Text("Open Archives from the menu to find archived events.")
-                    .font(.footnote)
-            }
+        HomeEmptyState(archivedCount: model.archivedEvents.count) {
+            showsArchives = true
         }
-        .font(.system(.body, design: .rounded))
-        .foregroundStyle(AppTheme.ink)
-        .padding(.horizontal, AppTheme.pagePadding)
-        .padding(.vertical, PhotoDomeTokens.Space.x4)
     }
 
     private func requirePermissions(for action: PendingPermissionAction) {
@@ -310,6 +297,47 @@ struct ContentView: View {
                 )
             }
         }
+    }
+}
+
+private struct HomeEmptyState: View {
+    let archivedCount: Int
+    let openArchives: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PhotoDomeTokens.Space.x3) {
+            Text(
+                archivedCount == 0
+                    ? "No events yet."
+                    : "No events in Your Events."
+            )
+            .font(.system(.title3, design: .rounded, weight: .semibold))
+            .foregroundStyle(AppTheme.ink)
+
+            Text(message)
+                .font(.system(.footnote, design: .rounded))
+                .foregroundStyle(AppTheme.ink)
+
+            Button(action: openArchives) {
+                Label("View Archives", systemImage: "archivebox")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(OutlineButtonStyle())
+            .accessibilityIdentifier("emptyStateArchivesButton")
+        }
+        .foregroundStyle(AppTheme.ink)
+        .padding(.horizontal, AppTheme.pagePadding)
+        .padding(.vertical, PhotoDomeTokens.Space.x4)
+    }
+
+    private var message: String {
+        if archivedCount == 0 {
+            return "Archived events stay available in Archives and can be restored at any time."
+        }
+        if archivedCount == 1 {
+            return "You have 1 archived event. View or restore it at any time."
+        }
+        return "You have \(archivedCount) archived events. View or restore them at any time."
     }
 }
 
@@ -583,18 +611,26 @@ private struct EventCard: View {
 
         var body: some View {
             NavigationStack {
-                List {
-                    if !isArchived {
-                        EventListRow(
-                            access: Self.access,
-                            isArchived: false
-                        ) {
-                            isArchived = true
+                Group {
+                    if isArchived {
+                        ScrollView {
+                            HomeEmptyState(archivedCount: 1) {
+                                showsArchives = true
+                            }
                         }
-                        .eventListRowStyle()
+                    } else {
+                        List {
+                            EventListRow(
+                                access: Self.access,
+                                isArchived: false
+                            ) {
+                                isArchived = true
+                            }
+                            .eventListRowStyle()
+                        }
+                        .listStyle(.plain)
                     }
                 }
-                .listStyle(.plain)
                 .navigationTitle("Your Events")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {

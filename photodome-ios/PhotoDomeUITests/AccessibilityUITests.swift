@@ -197,6 +197,43 @@ final class AccessibilityUITests: XCTestCase {
         )
     }
 
+    func testEmptyHomeOffersArchivesRecoveryAction() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestEventArchive")
+        app.launch()
+
+        let eventCard = app.buttons["eventCard.archive-regression"]
+        XCTAssertTrue(eventCard.waitForExistence(timeout: 5))
+        eventCard.swipeLeft()
+        let archiveButton = app.buttons["Archive"]
+        XCTAssertTrue(archiveButton.waitForExistence(timeout: 2))
+        archiveButton.tap()
+
+        XCTAssertTrue(
+            app.staticTexts["No events in Your Events."].waitForExistence(
+                timeout: 2
+            )
+        )
+        XCTAssertTrue(
+            app.staticTexts[
+                "You have 1 archived event. View or restore it at any time."
+            ].exists
+        )
+
+        let emptyStateArchives = app.buttons["emptyStateArchivesButton"]
+        XCTAssertTrue(emptyStateArchives.exists)
+        XCTAssertEqual(emptyStateArchives.label, "View Archives")
+        emptyStateArchives.tap()
+
+        XCTAssertTrue(
+            app.navigationBars["Archives"].waitForExistence(timeout: 2)
+        )
+        XCTAssertTrue(
+            app.buttons["eventCard.archive-regression"].exists
+        )
+    }
+
     func testAttendingCountOpensHostAttendeeManagement() {
         continueAfterFailure = false
         app = XCUIApplication()
