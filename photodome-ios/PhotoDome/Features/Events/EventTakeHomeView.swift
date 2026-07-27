@@ -14,11 +14,10 @@ struct EventTakeHomeView: View {
                 Button {
                     showsReview = true
                 } label: {
-                    Label("Choose photos", systemImage: "hand.draw")
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-                        .allowsTightening(true)
-                        .frame(maxWidth: .infinity)
+                    actionLabel(
+                        "Choose photos",
+                        systemImage: "hand.draw"
+                    )
                 }
                 .buttonStyle(OutlineButtonStyle())
 
@@ -29,16 +28,12 @@ struct EventTakeHomeView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                     } else {
-                        Label(
+                        actionLabel(
                             EventTakeHomePolicy.saveAllLabel(
                                 for: access.event.state
                             ),
                             systemImage: "square.and.arrow.down"
                         )
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.75)
-                        .allowsTightening(true)
-                        .frame(maxWidth: .infinity)
                     }
                 }
                 .buttonStyle(MonochromeButtonStyle())
@@ -62,6 +57,34 @@ struct EventTakeHomeView: View {
         } message: {
             Text(presentedError ?? "")
         }
+    }
+
+    private func actionLabel(
+        _ title: String,
+        systemImage: String
+    ) -> some View {
+        ViewThatFits(in: .horizontal) {
+            Label(title, systemImage: systemImage)
+                .fixedSize(horizontal: true, vertical: false)
+
+            Text(title)
+                .fixedSize(horizontal: true, vertical: false)
+
+            Text(title)
+                .font(
+                    .system(
+                        .subheadline,
+                        design: .rounded,
+                        weight: .semibold
+                    )
+                )
+                .minimumScaleFactor(0.65)
+        }
+        .lineLimit(1)
+        .allowsTightening(true)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(title)
     }
 
     @ViewBuilder
