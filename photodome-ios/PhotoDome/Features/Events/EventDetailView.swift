@@ -571,6 +571,19 @@ private struct AttendeeListContent: View {
         }
     }
 
+    struct HostTransferRegressionView: View {
+        var body: some View {
+            HostTransferView(
+                transfer: HostTransfer(
+                    eventID: "transfer-regression",
+                    transferToken: "transfer-regression-token",
+                    joinCode: "ABCD2345",
+                    expiresAt: "2026-07-28T00:10:00.000Z"
+                )
+            )
+        }
+    }
+
     struct AttendeeListRegressionView: View {
         @State private var showsAttendees = false
 
@@ -651,12 +664,6 @@ private struct HostTransferView: View {
                 .font(.system(.body, design: .rounded))
                 .foregroundStyle(AppTheme.secondaryInk)
                 .multilineTextAlignment(.center)
-
-                ShareLink(item: payload.url) {
-                    Text("Share transfer link")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(OutlineButtonStyle())
 
                 Spacer()
             }

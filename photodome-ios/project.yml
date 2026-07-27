@@ -79,7 +79,7 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
       configs:
         Debug:
-          PHOTODOME_API_BASE_URL: http://127.0.0.1:3000
+          PHOTODOME_API_BASE_URL: http://127.0.0.1:3663
         Release:
           PHOTODOME_RELEASE_API_BASE_URL: https://api.kindredarc.com
           PHOTODOME_API_BASE_URL: $(PHOTODOME_RELEASE_API_BASE_URL)
