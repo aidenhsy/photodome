@@ -123,6 +123,29 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Continue"].isEnabled)
     }
 
+    func testAlbumGridEdgeTapsSelectTheVisiblePhoto() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestAlbumGridHitTargets")
+        app.launch()
+
+        let top = app.buttons["albumPhoto.top"]
+        let bottom = app.buttons["albumPhoto.bottom"]
+        let result = app.staticTexts["albumGridTapResult"]
+        XCTAssertTrue(top.waitForExistence(timeout: 5))
+        XCTAssertTrue(bottom.exists)
+
+        top.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98)
+        ).tap()
+        XCTAssertEqual(result.label, "Tapped top")
+
+        bottom.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.02)
+        ).tap()
+        XCTAssertEqual(result.label, "Tapped bottom")
+    }
+
     private func auditCurrentScreen() throws {
         try app.performAccessibilityAudit(
             for: [
