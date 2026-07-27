@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 final class EventAppViewModel: ObservableObject {
     @Published private(set) var events: [StoredEventAccess] = []
+    @Published private(set) var archivedEventIDs: Set<String> = []
     @Published private(set) var membersByEvent: [String: [EventMember]] = [:]
     @Published private(set) var isLoading = true
     @Published var presentedError: String?
@@ -11,6 +12,20 @@ final class EventAppViewModel: ObservableObject {
     private var api: APIClient?
     private var didBootstrap = false
     private var bootstrapTask: Task<Void, Never>?
+    private let archiveStore: EventArchiveStore
+
+    init(archiveStore: EventArchiveStore = EventArchiveStore()) {
+        self.archiveStore = archiveStore
+        archivedEventIDs = archiveStore.load()
+    }
+
+    var activeEvents: [StoredEventAccess] {
+        events.filter { !archivedEventIDs.contains($0.id) }
+    }
+
+    var archivedEvents: [StoredEventAccess] {
+        events.filter { archivedEventIDs.contains($0.id) }
+    }
 
     func bootstrap() async {
         if let bootstrapTask {
@@ -68,6 +83,8 @@ final class EventAppViewModel: ObservableObject {
                 }
             }
             events = available
+            archiveStore.retain(eventIDs: Set(available.map(\.id)))
+            archivedEventIDs = archiveStore.load()
             syncLiveActivities()
         } catch {
             presentedError = error.photoDomeMessage
@@ -88,6 +105,7 @@ final class EventAppViewModel: ObservableObject {
                 displayName: displayName
             )
             upsert(access)
+            unarchive(eventID: access.id)
             return access.id
         } catch {
             presentedError = error.photoDomeMessage
@@ -109,6 +127,7 @@ final class EventAppViewModel: ObservableObject {
                 displayName: displayName
             )
             upsert(access)
+            unarchive(eventID: access.id)
             return true
         } catch {
             presentedError = error.photoDomeMessage
@@ -126,6 +145,7 @@ final class EventAppViewModel: ObservableObject {
                 let access = try await requireRepository()
                     .acceptHostTransfer(payload)
                 upsert(access)
+                unarchive(eventID: access.id)
                 return true
             } catch {
                 presentedError = error.photoDomeMessage
@@ -275,6 +295,19 @@ final class EventAppViewModel: ObservableObject {
         events.first { $0.id == eventID }
     }
 
+    func archive(eventID: String) {
+        guard events.contains(where: { $0.id == eventID }) else {
+            return
+        }
+        archiveStore.archive(eventID: eventID)
+        archivedEventIDs.insert(eventID)
+    }
+
+    func unarchive(eventID: String) {
+        archiveStore.unarchive(eventID: eventID)
+        archivedEventIDs.remove(eventID)
+    }
+
     private func requireRepository() throws -> EventRepository {
         guard let repository else {
             throw APIClientError.unexpectedStatus(0)
@@ -298,6 +331,7 @@ final class EventAppViewModel: ObservableObject {
             presentedError = error.photoDomeMessage
         }
         events.removeAll { $0.id == eventID }
+        unarchive(eventID: eventID)
         membersByEvent[eventID] = nil
         syncLiveActivities()
     }

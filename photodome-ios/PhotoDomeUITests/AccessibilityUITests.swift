@@ -162,6 +162,41 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertEqual(copyButton.label, "Code copied")
     }
 
+    func testEventCanBeArchivedAndUnarchivedFromTheMenu() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestEventArchive")
+        app.launch()
+
+        let eventCard = app.buttons["eventCard.archive-regression"]
+        XCTAssertTrue(eventCard.waitForExistence(timeout: 5))
+        eventCard.swipeLeft()
+        let archiveButton = app.buttons["Archive"]
+        XCTAssertTrue(archiveButton.waitForExistence(timeout: 2))
+        archiveButton.tap()
+        XCTAssertFalse(eventCard.exists)
+
+        app.buttons["menuButton"].tap()
+        let archivesButton = app.buttons["archivesMenuButton"]
+        XCTAssertTrue(archivesButton.waitForExistence(timeout: 2))
+        archivesButton.tap()
+        XCTAssertTrue(
+            app.navigationBars["Archives"].waitForExistence(timeout: 2)
+        )
+
+        let archivedCard = app.buttons["eventCard.archive-regression"]
+        XCTAssertTrue(archivedCard.waitForExistence(timeout: 2))
+        archivedCard.press(forDuration: 1)
+        let unarchiveButton = app.buttons["Unarchive"]
+        XCTAssertTrue(unarchiveButton.waitForExistence(timeout: 2))
+        unarchiveButton.tap()
+        XCTAssertTrue(
+            app.staticTexts["No archived events."].waitForExistence(
+                timeout: 2
+            )
+        )
+    }
+
     func testAttendingCountOpensHostAttendeeManagement() {
         continueAfterFailure = false
         app = XCUIApplication()

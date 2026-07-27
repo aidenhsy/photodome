@@ -7,6 +7,8 @@ struct ContentView: View {
     @State private var showsCreate = false
     @State private var showsJoin = false
     @State private var showsSettings = false
+    @State private var showsMenu = false
+    @State private var showsArchives = false
     @State private var pendingPermissionAction: PendingPermissionAction?
     @State private var pendingNameAction: PendingPermissionAction?
     @State private var hasDismissedInitialNamePrompt = false
@@ -61,8 +63,17 @@ struct ContentView: View {
                     eventList
                 }
             }
+            .navigationTitle("Your Events")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    HomeMenuButton {
+                        withAnimation(.easeInOut(duration: 0.22)) {
+                            showsMenu = true
+                        }
+                    }
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         pendingPermissionAction = nil
@@ -83,6 +94,23 @@ struct ContentView: View {
                     cameraPresentationRequestID: route.opensCamera
                         ? cameraPresentationRequestID : nil
                 )
+            }
+            .navigationDestination(isPresented: $showsArchives) {
+                ArchivedEventsView(model: model)
+            }
+        }
+        .overlay {
+            HomeNavigationMenu(
+                isPresented: $showsMenu,
+                archivedCount: model.archivedEvents.count
+            ) {
+                withAnimation(.easeInOut(duration: 0.22)) {
+                    showsMenu = false
+                }
+                Task { @MainActor in
+                    await Task.yield()
+                    showsArchives = true
+                }
             }
         }
         .task { await model.bootstrap() }
@@ -169,29 +197,28 @@ struct ContentView: View {
     }
 
     private var eventList: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 16) {
-                Text("YOUR EVENTS")
-                    .font(AppTheme.eyebrow)
-                    .foregroundStyle(AppTheme.secondaryInk)
-                    .padding(.top, PhotoDomeTokens.Space.x2)
-
-                if model.events.isEmpty {
+        Group {
+            if model.activeEvents.isEmpty {
+                ScrollView {
                     emptyState
-                } else {
-                    ForEach(model.events) { access in
-                        NavigationLink(
-                            value: EventDeepLink.event(
-                                eventID: access.id
-                            )
+                }
+                .background(AppTheme.canvas)
+            } else {
+                List {
+                    ForEach(model.activeEvents) { access in
+                        EventListRow(
+                            access: access,
+                            isArchived: false
                         ) {
-                            EventCard(access: access)
+                            model.archive(eventID: access.id)
                         }
-                        .buttonStyle(.plain)
+                        .eventListRowStyle()
                     }
                 }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(AppTheme.canvas)
             }
-            .padding(AppTheme.pagePadding)
         }
         .safeAreaInset(edge: .bottom) {
             VStack(spacing: PhotoDomeTokens.Space.x2) {
@@ -211,10 +238,23 @@ struct ContentView: View {
         }
     }
 
+    @ViewBuilder
     private var emptyState: some View {
-        Text("No events yet.")
-            .font(.system(.body, design: .rounded))
-            .foregroundStyle(AppTheme.secondaryInk)
+        VStack(alignment: .leading, spacing: PhotoDomeTokens.Space.x2) {
+            Text(
+                model.archivedEvents.isEmpty
+                    ? "No events yet."
+                    : "No events in Your Events."
+            )
+            if !model.archivedEvents.isEmpty {
+                Text("Open Archives from the menu to find archived events.")
+                    .font(.footnote)
+            }
+        }
+        .font(.system(.body, design: .rounded))
+        .foregroundStyle(AppTheme.ink)
+        .padding(.horizontal, AppTheme.pagePadding)
+        .padding(.vertical, PhotoDomeTokens.Space.x4)
     }
 
     private func requirePermissions(for action: PendingPermissionAction) {
@@ -270,6 +310,175 @@ struct ContentView: View {
                 )
             }
         }
+    }
+}
+
+private struct ArchivedEventsView: View {
+    @ObservedObject var model: EventAppViewModel
+
+    var body: some View {
+        Group {
+            if model.archivedEvents.isEmpty {
+                ScrollView {
+                    Text("No archived events.")
+                        .font(.system(.body, design: .rounded))
+                        .foregroundStyle(AppTheme.ink)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(AppTheme.pagePadding)
+                }
+                .background(AppTheme.canvas)
+            } else {
+                List {
+                    ForEach(model.archivedEvents) { access in
+                        EventListRow(
+                            access: access,
+                            isArchived: true
+                        ) {
+                            model.unarchive(eventID: access.id)
+                        }
+                        .eventListRowStyle()
+                    }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(AppTheme.canvas)
+            }
+        }
+        .navigationTitle("Archives")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct HomeMenuButton: View {
+    let open: () -> Void
+
+    var body: some View {
+        Button(action: open) {
+            Image(systemName: "line.3.horizontal")
+        }
+        .accessibilityLabel("Menu")
+        .accessibilityIdentifier("menuButton")
+    }
+}
+
+private struct HomeNavigationMenu: View {
+    @Binding var isPresented: Bool
+    let archivedCount: Int
+    let openArchives: () -> Void
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                if isPresented {
+                    Color.black.opacity(0.28)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation(.easeInOut(duration: 0.22)) {
+                                isPresented = false
+                            }
+                        }
+                        .accessibilityHidden(true)
+
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("PhotoDome")
+                            .font(
+                                .system(
+                                    .title2,
+                                    design: .rounded,
+                                    weight: .bold
+                                )
+                            )
+                            .padding(.bottom, PhotoDomeTokens.Space.x6)
+
+                        Button(action: openArchives) {
+                            HStack(spacing: PhotoDomeTokens.Space.x3) {
+                                Image(systemName: "archivebox")
+                                Text("Archives")
+                                Spacer()
+                                if archivedCount > 0 {
+                                    Text("\(archivedCount)")
+                                        .foregroundStyle(
+                                            AppTheme.secondaryInk
+                                        )
+                                }
+                            }
+                            .font(PhotoDomeTokens.TypeStyle.headline)
+                            .frame(
+                                minHeight:
+                                    PhotoDomeTokens.Size.minimumTouchTarget
+                            )
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("archivesMenuButton")
+
+                        Spacer()
+                    }
+                    .padding(.horizontal, AppTheme.pagePadding)
+                    .padding(.top, proxy.safeAreaInsets.top + 24)
+                    .padding(.bottom, proxy.safeAreaInsets.bottom + 24)
+                    .frame(width: min(proxy.size.width * 0.82, 320))
+                    .frame(maxHeight: .infinity, alignment: .topLeading)
+                    .background(AppTheme.canvas)
+                    .shadow(color: .black.opacity(0.16), radius: 24, x: 8)
+                    .transition(.move(edge: .leading))
+                }
+            }
+            .animation(.easeInOut(duration: 0.22), value: isPresented)
+        }
+        .allowsHitTesting(isPresented)
+    }
+}
+
+private struct EventListRow: View {
+    let access: StoredEventAccess
+    let isArchived: Bool
+    let toggleArchive: () -> Void
+
+    private var actionTitle: String {
+        isArchived ? "Unarchive" : "Archive"
+    }
+
+    private var actionSystemImage: String {
+        isArchived ? "arrow.uturn.backward" : "archivebox"
+    }
+
+    var body: some View {
+        NavigationLink(
+            value: EventDeepLink.event(eventID: access.id)
+        ) {
+            EventCard(access: access)
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("eventCard.\(access.id)")
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            archiveButton
+                .tint(AppTheme.ink)
+        }
+        .contextMenu {
+            archiveButton
+        }
+    }
+
+    private var archiveButton: some View {
+        Button(action: toggleArchive) {
+            Label(actionTitle, systemImage: actionSystemImage)
+        }
+    }
+}
+
+extension View {
+    fileprivate func eventListRowStyle() -> some View {
+        listRowInsets(
+            EdgeInsets(
+                top: PhotoDomeTokens.Space.x2,
+                leading: AppTheme.pagePadding,
+                bottom: PhotoDomeTokens.Space.x2,
+                trailing: AppTheme.pagePadding
+            )
+        )
+        .listRowSeparator(.hidden)
+        .listRowBackground(AppTheme.canvas)
     }
 }
 
@@ -350,9 +559,6 @@ private struct EventCard: View {
             }
 
             Spacer()
-            Image(systemName: "chevron.right")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(AppTheme.secondaryInk)
         }
         .padding(18)
         .background(
@@ -368,6 +574,97 @@ private struct EventCard: View {
         .accessibilityElement(children: .combine)
     }
 }
+
+#if DEBUG
+    struct EventArchiveRegressionView: View {
+        @State private var isArchived = false
+        @State private var showsMenu = false
+        @State private var showsArchives = false
+
+        var body: some View {
+            NavigationStack {
+                List {
+                    if !isArchived {
+                        EventListRow(
+                            access: Self.access,
+                            isArchived: false
+                        ) {
+                            isArchived = true
+                        }
+                        .eventListRowStyle()
+                    }
+                }
+                .listStyle(.plain)
+                .navigationTitle("Your Events")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        HomeMenuButton {
+                            withAnimation(.easeInOut(duration: 0.22)) {
+                                showsMenu = true
+                            }
+                        }
+                    }
+                }
+                .navigationDestination(for: EventDeepLink.self) { _ in
+                    Text("Event detail")
+                }
+                .navigationDestination(isPresented: $showsArchives) {
+                    List {
+                        if isArchived {
+                            EventListRow(
+                                access: Self.access,
+                                isArchived: true
+                            ) {
+                                isArchived = false
+                            }
+                            .eventListRowStyle()
+                        } else {
+                            Text("No archived events.")
+                        }
+                    }
+                    .listStyle(.plain)
+                    .navigationTitle("Archives")
+                    .navigationBarTitleDisplayMode(.inline)
+                }
+            }
+            .overlay {
+                HomeNavigationMenu(
+                    isPresented: $showsMenu,
+                    archivedCount: isArchived ? 1 : 0
+                ) {
+                    withAnimation(.easeInOut(duration: 0.22)) {
+                        showsMenu = false
+                    }
+                    Task { @MainActor in
+                        await Task.yield()
+                        showsArchives = true
+                    }
+                }
+            }
+        }
+
+        private static let access = StoredEventAccess(
+            event: EventSnapshot(
+                id: "archive-regression",
+                name: "Archive Test Event",
+                hostDisplayName: "Taylor",
+                locationLabel: nil,
+                state: .ended,
+                memberCount: 2,
+                readyPhotoCount: 3,
+                createdAt: "2026-07-20T16:00:00.000Z",
+                endedAt: "2026-07-20T18:00:00.000Z",
+                expiresAt: "2026-07-27T18:00:00.000Z",
+                uploadsRestrictedAt: nil,
+                memberID: "archive-regression-member",
+                role: .host
+            ),
+            capability: "pdc_archive_regression",
+            joinCode: "ARCH2345"
+        )
+    }
+#endif
 
 #Preview {
     ContentView()
