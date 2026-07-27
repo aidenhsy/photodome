@@ -1,3 +1,4 @@
+import AVFoundation
 import CoreLocation
 import ImageIO
 import UIKit
@@ -7,6 +8,52 @@ import XCTest
 @testable import PhotoDome
 
 final class MediaPipelineTests: XCTestCase {
+    func testCameraFlashModesCycleOffAutoOn() {
+        XCTAssertEqual(EventCameraFlashMode.off.next, .auto)
+        XCTAssertEqual(EventCameraFlashMode.auto.next, .on)
+        XCTAssertEqual(EventCameraFlashMode.on.next, .off)
+    }
+
+    func testCameraFlashPolicyDisablesHardwareFlashForFrontCamera() {
+        XCTAssertEqual(
+            EventCameraCapturePolicy.resolvedFlashMode(
+                preference: .on,
+                supportedModes: [.off, .auto, .on],
+                position: .front
+            ),
+            .off
+        )
+        XCTAssertEqual(
+            EventCameraCapturePolicy.resolvedFlashMode(
+                preference: .auto,
+                supportedModes: [.off, .auto, .on],
+                position: .back
+            ),
+            .auto
+        )
+    }
+
+    func testCameraZoomPolicyClampsToTheActiveLensRange() {
+        XCTAssertEqual(
+            EventCameraCapturePolicy.clampedZoom(
+                current: 1,
+                scale: 20,
+                minimum: 1,
+                maximum: 10
+            ),
+            10
+        )
+        XCTAssertEqual(
+            EventCameraCapturePolicy.clampedZoom(
+                current: 2,
+                scale: 0.1,
+                minimum: 0.5,
+                maximum: 10
+            ),
+            0.5
+        )
+    }
+
     func testJPEGImportPreservesOriginalBytesAndMetadata()
         async throws
     {
