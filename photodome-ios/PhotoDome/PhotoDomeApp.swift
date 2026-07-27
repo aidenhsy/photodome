@@ -30,6 +30,10 @@ struct PhotoDomeApp: App {
                 "PhotoDomeUITestAttendeeList"
             ) {
                 AttendeeListRegressionView()
+            } else if ProcessInfo.processInfo.arguments.contains(
+                "PhotoDomeUITestCameraControls"
+            ) {
+                CameraControlsRegressionView()
             } else {
                 ContentView()
             }

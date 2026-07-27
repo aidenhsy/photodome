@@ -249,6 +249,45 @@ final class AccessibilityUITests: XCTestCase {
         )
     }
 
+    func testCameraExposesFlashZoomAndLensSwitchingControls() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestCameraControls")
+        app.launch()
+
+        let flash = app.buttons["cameraFlashButton"]
+        let zoom = app.buttons["cameraZoomButton"]
+        let switchCamera = app.buttons["cameraSwitchButton"]
+        let shutter = app.buttons["cameraShutterButton"]
+
+        XCTAssertTrue(flash.waitForExistence(timeout: 5))
+        XCTAssertEqual(flash.label, "Flash Auto")
+        XCTAssertTrue(flash.isEnabled)
+        XCTAssertTrue(zoom.exists)
+        XCTAssertEqual(zoom.value as? String, "1.0 times")
+        XCTAssertTrue(switchCamera.exists)
+        XCTAssertEqual(switchCamera.label, "Switch to front camera")
+        XCTAssertTrue(shutter.exists)
+
+        flash.tap()
+        XCTAssertEqual(flash.label, "Flash On")
+
+        zoom.tap()
+        XCTAssertEqual(zoom.value as? String, "2.0 times")
+
+        switchCamera.tap()
+        XCTAssertEqual(switchCamera.label, "Switch to back camera")
+        XCTAssertEqual(flash.label, "Flash unavailable")
+        XCTAssertFalse(flash.isEnabled)
+        XCTAssertEqual(zoom.value as? String, "1.0 times")
+
+        shutter.tap()
+        XCTAssertEqual(
+            app.staticTexts["cameraCaptureResult"].label,
+            "Captured 1"
+        )
+    }
+
     private func auditCurrentScreen() throws {
         try app.performAccessibilityAudit(
             for: [
