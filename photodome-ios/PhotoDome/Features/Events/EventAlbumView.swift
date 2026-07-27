@@ -91,7 +91,7 @@ struct EventAlbumView: View {
                     spacing: PhotoDomeTokens.Space.x1
                 ) {
                     ForEach(model.photos) { photo in
-                        Button {
+                        AlbumGridCell(photoID: photo.id) {
                             handlePhotoTap(photo)
                         } label: {
                             ZStack {
@@ -108,7 +108,6 @@ struct EventAlbumView: View {
                                 .padding(6)
                             }
                         }
-                        .buttonStyle(.plain)
                         .contextMenu {
                             photoActions(photo)
                         }
@@ -422,6 +421,65 @@ struct EventAlbumView: View {
         }
     }
 }
+
+struct AlbumGridCell<Label: View>: View {
+    let photoID: String
+    let action: () -> Void
+    @ViewBuilder let label: () -> Label
+
+    var body: some View {
+        Button(action: action) {
+            label()
+                // `scaledToFill` content keeps its oversized interaction
+                // region even when its pixels are clipped. Constrain every
+                // album button to its visible grid cell so a neighboring
+                // photo cannot intercept taps near a row boundary.
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("albumPhoto.\(photoID)")
+    }
+}
+
+#if DEBUG
+    struct AlbumGridHitTargetRegressionView: View {
+        @State private var lastTappedPhoto = "none"
+
+        var body: some View {
+            VStack(spacing: 16) {
+                Text("Tapped \(lastTappedPhoto)")
+                    .accessibilityIdentifier("albumGridTapResult")
+
+                LazyVGrid(
+                    columns: [GridItem(.fixed(180))],
+                    spacing: PhotoDomeTokens.Space.x1
+                ) {
+                    regressionCell(photoID: "top", symbol: "rectangle.portrait.fill")
+                    regressionCell(photoID: "bottom", symbol: "rectangle.landscape.fill")
+                }
+            }
+            .padding()
+        }
+
+        private func regressionCell(
+            photoID: String,
+            symbol: String
+        ) -> some View {
+            AlbumGridCell(photoID: photoID) {
+                lastTappedPhoto = photoID
+            } label: {
+                Color.clear
+                    .aspectRatio(1, contentMode: .fit)
+                    .overlay {
+                        Image(systemName: symbol)
+                            .resizable()
+                            .scaledToFill()
+                    }
+                    .clipShape(Rectangle())
+            }
+        }
+    }
+#endif
 
 private struct PhotoStatusBadge: View {
     let title: String

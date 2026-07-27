@@ -6,8 +6,23 @@ struct PhotoDomeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            rootView
                 .tint(PhotoDomeTokens.Semantic.textPrimary)
         }
+    }
+
+    @ViewBuilder
+    private var rootView: some View {
+        #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains(
+                "PhotoDomeUITestAlbumGridHitTargets"
+            ) {
+                AlbumGridHitTargetRegressionView()
+            } else {
+                ContentView()
+            }
+        #else
+            ContentView()
+        #endif
     }
 }
