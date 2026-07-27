@@ -381,11 +381,15 @@ struct APIClient: Sendable {
 
     func listPhotos(
         eventID: String,
-        capability: String
+        capability: String,
+        cursor: String? = nil
     ) async throws -> AlbumPhotoPage {
         let output = try await authorizedClient(capability: capability)
             .listEventPhotos(
-                .init(path: .init(eventId: eventID))
+                .init(
+                    path: .init(eventId: eventID),
+                    query: .init(cursor: cursor)
+                )
             )
         switch output {
         case .ok(let response):
@@ -411,6 +415,7 @@ struct APIClient: Sendable {
             }
             return AlbumPhotoPage(
                 photos: photos,
+                nextCursor: dto.nextCursor,
                 readyPhotoCount: Int(dto.readyPhotoCount)
             )
         case .undocumented(let statusCode, _):

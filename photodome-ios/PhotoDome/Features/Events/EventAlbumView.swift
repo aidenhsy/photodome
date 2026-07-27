@@ -106,7 +106,14 @@ struct EventAlbumView: View {
                             handlePhotoTap(photo)
                         } label: {
                             ZStack {
-                                AlbumThumbnail(url: photo.thumbnailURL) {
+                                AlbumThumbnail(
+                                    eventID: model.access.id,
+                                    photo: photo,
+                                    eventExpiresAt:
+                                        AlbumMediaURLRefreshPolicy.date(
+                                            model.access.event.expiresAt
+                                        )
+                                ) {
                                     Task {
                                         await model
                                             .recoverMediaURLAfterFailure(
@@ -125,6 +132,9 @@ struct EventAlbumView: View {
                                 }
                                 .padding(6)
                             }
+                        }
+                        .task {
+                            await model.photoBecameVisible(photo.id)
                         }
                         .contextMenu {
                             photoActions(photo)
@@ -415,24 +425,27 @@ struct EventAlbumView: View {
         saveToLibrary: Bool = false
     ) {
         let uploadID = UUID()
-        guard let image = UIImage(data: data) else {
-            model.presentedError =
-                ImagePreprocessorError.unreadable
-                .localizedDescription
-            return
-        }
         preparingUploads.append(
-            PreparingAlbumPhoto(id: uploadID, image: image)
+            PreparingAlbumPhoto(id: uploadID, image: nil)
         )
 
         Task {
-            _ = await model.addPhoto(
+            async let thumbnail = LocalImageThumbnailer.make(data: data)
+            async let accepted = model.addPhoto(
                 data: data,
                 capturedAt: capturedAt,
                 captureLocation: captureLocation,
                 saveToLibrary: saveToLibrary,
                 uploadID: uploadID
             )
+            if let image = await thumbnail,
+                let index = preparingUploads.firstIndex(where: {
+                    $0.id == uploadID
+                })
+            {
+                preparingUploads[index].image = image
+            }
+            _ = await accepted
             preparingUploads.removeAll { $0.id == uploadID }
         }
     }
@@ -471,7 +484,7 @@ private enum AlbumPhotoConfirmation {
 
 private struct PreparingAlbumPhoto: Identifiable {
     let id: UUID
-    let image: UIImage
+    var image: UIImage?
 }
 
 private struct PreparingPhotoGridCell: View {
@@ -479,10 +492,15 @@ private struct PreparingPhotoGridCell: View {
 
     var body: some View {
         ZStack {
-            Image(uiImage: photo.image)
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            if let image = photo.image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                Rectangle()
+                    .fill(AppTheme.softFill)
+            }
 
             UploadPhotoOverlay(state: nil)
         }
@@ -635,9 +653,7 @@ private struct LocalAlbumThumbnail: View {
     }
 
     private static func loadImage(at fileURL: URL) async -> UIImage? {
-        await Task.detached(priority: .userInitiated) {
-            UIImage(contentsOfFile: fileURL.path)
-        }.value
+        await LocalImageThumbnailer.make(fileURL: fileURL)
     }
 }
 
@@ -780,7 +796,9 @@ private struct AlbumActionButtonStyle: ButtonStyle {
 }
 
 private struct AlbumThumbnail: View {
-    let url: URL
+    let eventID: String
+    let photo: AlbumPhoto
+    let eventExpiresAt: Date?
     let onLoadFailure: () -> Void
 
     var body: some View {
@@ -788,18 +806,21 @@ private struct AlbumThumbnail: View {
             .fill(AppTheme.softFill)
             .aspectRatio(1, contentMode: .fit)
             .overlay {
-                AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    case .failure:
+                CachedEventImage(
+                    eventID: eventID,
+                    photo: photo,
+                    variant: .thumbnail,
+                    eventExpiresAt: eventExpiresAt,
+                    contentMode: .fill,
+                    onFailure: onLoadFailure
+                ) {
+                    if AlbumMediaURLRefreshPolicy.isUsable(
+                        photo.urlsExpireAt
+                    ) {
+                        ProgressView()
+                    } else {
                         Image(systemName: "photo")
                             .foregroundStyle(AppTheme.secondaryInk)
-                            .onAppear(perform: onLoadFailure)
-                    default:
-                        ProgressView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

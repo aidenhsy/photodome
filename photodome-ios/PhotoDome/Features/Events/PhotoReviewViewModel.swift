@@ -1,5 +1,27 @@
 import Foundation
 
+protocol PhotoReviewServing: Sendable {
+    func getReviewQueue(
+        eventID: String,
+        capability: String,
+        cursor: String?
+    ) async throws -> ReviewPhotoPage
+
+    func setPhotoSelection(
+        eventID: String,
+        photoID: String,
+        capability: String,
+        decision: PhotoSelectionDecision
+    ) async throws -> PhotoSelection
+
+    func undoLatestSelection(
+        eventID: String,
+        capability: String
+    ) async throws -> PhotoSelection?
+}
+
+extension APIClient: PhotoReviewServing {}
+
 @MainActor
 final class PhotoReviewViewModel: ObservableObject {
     @Published private(set) var photos: [AlbumPhoto] = []
@@ -12,13 +34,19 @@ final class PhotoReviewViewModel: ObservableObject {
     @Published var presentedError: String?
 
     let access: StoredEventAccess
-    private var api: APIClient?
+    private var api: (any PhotoReviewServing)?
     private var nextCursor: String?
     private var didBootstrap = false
+    private var lastMediaURLRecoveryAt: Date?
     private let realtime = EventRealtimeClient()
+    private static let mediaURLRecoveryCooldown: TimeInterval = 15
 
-    init(access: StoredEventAccess) {
+    init(
+        access: StoredEventAccess,
+        api: (any PhotoReviewServing)? = nil
+    ) {
         self.access = access
+        self.api = api
     }
 
     var currentPhoto: AlbumPhoto? {
@@ -29,11 +57,13 @@ final class PhotoReviewViewModel: ObservableObject {
         guard !didBootstrap else { return }
         didBootstrap = true
         do {
-            let identity = try await InstallationIdentityStore().identity()
-            api = APIClient(
-                baseURL: AppConfiguration.apiBaseURL,
-                installationIdentity: identity
-            )
+            if api == nil {
+                let identity = try await InstallationIdentityStore().identity()
+                api = APIClient(
+                    baseURL: AppConfiguration.apiBaseURL,
+                    installationIdentity: identity
+                )
+            }
             realtime.connect(
                 eventID: access.id,
                 capability: access.capability
@@ -56,6 +86,13 @@ final class PhotoReviewViewModel: ObservableObject {
         }
         isSubmitting = true
         defer { isSubmitting = false }
+        photos.removeFirst()
+        decidedPhotoCount += 1
+        if decision == .keep {
+            keptPhotoCount += 1
+        }
+        prefetchUpcomingPhotos()
+
         do {
             _ = try await api.setPhotoSelection(
                 eventID: access.id,
@@ -63,15 +100,15 @@ final class PhotoReviewViewModel: ObservableObject {
                 capability: access.capability,
                 decision: decision
             )
-            photos.removeFirst()
-            decidedPhotoCount += 1
-            if decision == .keep {
-                keptPhotoCount += 1
-            }
             if photos.count <= 5 {
                 await loadMore()
             }
         } catch {
+            photos.insert(photo, at: 0)
+            decidedPhotoCount = max(0, decidedPhotoCount - 1)
+            if decision == .keep {
+                keptPhotoCount = max(0, keptPhotoCount - 1)
+            }
             presentedError = error.photoDomeMessage
         }
     }
@@ -96,13 +133,14 @@ final class PhotoReviewViewModel: ObservableObject {
     }
 
     func refresh() async {
-        guard let api else { return }
+        guard let api, !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         do {
             let page = try await api.getReviewQueue(
                 eventID: access.id,
-                capability: access.capability
+                capability: access.capability,
+                cursor: nil
             )
             let savedPhotoIDs = PhotoDownloadManager.shared.savedPhotoIDs(
                 eventID: access.id
@@ -119,6 +157,7 @@ final class PhotoReviewViewModel: ObservableObject {
             if photos.count <= 5 {
                 await loadMore()
             }
+            prefetchUpcomingPhotos()
         } catch {
             presentedError = error.photoDomeMessage
         }
@@ -126,6 +165,26 @@ final class PhotoReviewViewModel: ObservableObject {
 
     func disconnect() {
         realtime.disconnect()
+    }
+
+    func recoverMediaURLAfterFailure(
+        _ failedURL: URL,
+        at now: Date = Date()
+    ) async {
+        guard
+            photos.contains(where: { $0.displayURL == failedURL }),
+            !isLoading
+        else {
+            return
+        }
+        if let lastMediaURLRecoveryAt,
+            now.timeIntervalSince(lastMediaURLRecoveryAt)
+                < Self.mediaURLRecoveryCooldown
+        {
+            return
+        }
+        lastMediaURLRecoveryAt = now
+        await refresh()
     }
 
     private func loadMore() async {
@@ -154,6 +213,7 @@ final class PhotoReviewViewModel: ObservableObject {
             if photos.count <= 5, nextCursor != nil {
                 await loadMore()
             }
+            prefetchUpcomingPhotos()
         } catch {
             presentedError = error.photoDomeMessage
         }
@@ -182,5 +242,18 @@ final class PhotoReviewViewModel: ObservableObject {
     private func refreshKeepingIncomingNotice() async {
         await refresh()
         hasIncomingPhotos = true
+    }
+
+    private func prefetchUpcomingPhotos() {
+        EventImagePipeline.shared.prefetch(
+            eventID: access.id,
+            photos: Array(photos.prefix(4)).filter {
+                AlbumMediaURLRefreshPolicy.isUsable($0.urlsExpireAt)
+            },
+            variant: .display,
+            eventExpiresAt: AlbumMediaURLRefreshPolicy.date(
+                access.event.expiresAt
+            )
+        )
     }
 }

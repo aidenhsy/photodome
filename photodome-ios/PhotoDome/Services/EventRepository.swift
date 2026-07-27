@@ -10,28 +10,8 @@ actor EventRepository {
     }
 
     func restore() async throws -> [StoredEventAccess] {
-        let saved = try await store.loadAll()
-        var restored: [StoredEventAccess] = []
-
-        for var access in saved {
-            do {
-                access.event = try await api.getEvent(
-                    eventID: access.id,
-                    capability: access.capability
-                )
-                try await store.save(access)
-                restored.append(access)
-            } catch APIClientError.unauthorized {
-                try await store.remove(eventID: access.id)
-            } catch APIClientError.eventUnavailable {
-                try await store.remove(eventID: access.id)
-            } catch {
-                // Network failures must not erase a recoverable capability.
-                restored.append(access)
-            }
-        }
-
-        return restored.sorted { $0.event.createdAt > $1.event.createdAt }
+        try await store.loadAll()
+            .sorted { $0.event.createdAt > $1.event.createdAt }
     }
 
     func create(name: String, displayName: String) async throws

@@ -1,6 +1,15 @@
 {
-  "originHash" : "6eda5124cfff083ac9ef2b451950435f062e58cc4e87c38676a4748e483b4d4e",
+  "originHash" : "436fb38af124702d1e8197c381f9a0d4198658b935d50d114500e6921df81923",
   "pins" : [
+    {
+      "identity" : "kingfisher",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Kingfisher",
+      "state" : {
+        "revision" : "ac632bd26a1c00f139ff62fd01806f21cf67325e",
+        "version" : "8.10.0"
+      }
+    },
     {
       "identity" : "socket.io-client-swift",
       "kind" : "remoteSourceControl",

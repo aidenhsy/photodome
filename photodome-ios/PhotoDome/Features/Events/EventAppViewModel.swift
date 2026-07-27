@@ -56,28 +56,23 @@ final class EventAppViewModel: ObservableObject {
             self.api = api
             self.repository = repository
             let restored = try await repository.restore()
+            events = restored
+            archiveStore.retain(eventIDs: Set(restored.map(\.id)))
+            archivedEventIDs = archiveStore.load()
+            syncLiveActivities()
+            isLoading = false
+
             await BackgroundUploadManager.shared.configure()
             await PhotoDownloadManager.shared.configure()
+
             var available: [StoredEventAccess] = []
             for access in restored {
                 do {
                     available.append(try await repository.refresh(access))
                 } catch APIClientError.unauthorized {
-                    try? await repository.forget(eventID: access.id)
-                    await BackgroundUploadManager.shared.removeEvent(
-                        eventID: access.id
-                    )
-                    await PhotoDownloadManager.shared.removeEvent(
-                        eventID: access.id
-                    )
+                    await forget(eventID: access.id)
                 } catch APIClientError.eventUnavailable {
-                    try? await repository.forget(eventID: access.id)
-                    await BackgroundUploadManager.shared.removeEvent(
-                        eventID: access.id
-                    )
-                    await PhotoDownloadManager.shared.removeEvent(
-                        eventID: access.id
-                    )
+                    await forget(eventID: access.id)
                 } catch {
                     available.append(access)
                 }
@@ -325,6 +320,7 @@ final class EventAppViewModel: ObservableObject {
     private func forget(eventID: String) async {
         await BackgroundUploadManager.shared.removeEvent(eventID: eventID)
         await PhotoDownloadManager.shared.removeEvent(eventID: eventID)
+        await EventMediaCache.removeEvent(eventID: eventID)
         do {
             try await requireRepository().forget(eventID: eventID)
         } catch {

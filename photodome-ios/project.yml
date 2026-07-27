@@ -25,6 +25,9 @@ packages:
   SocketIO:
     url: https://github.com/socketio/socket.io-client-swift
     exactVersion: 16.1.1
+  Kingfisher:
+    url: https://github.com/onevcat/Kingfisher
+    exactVersion: 8.10.0
 targets:
   PhotoDome:
     type: application
@@ -40,6 +43,7 @@ targets:
       - package: OpenAPIRuntime
       - package: OpenAPIURLSession
       - package: SocketIO
+      - package: Kingfisher
     info:
       path: PhotoDome/Info.plist
       properties:

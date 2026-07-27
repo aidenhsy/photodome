@@ -76,26 +76,31 @@ struct PhotoReviewView: View {
 
     private func reviewCard(_ photo: AlbumPhoto) -> some View {
         ZStack(alignment: .top) {
-            AsyncImage(url: photo.displayURL) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
-                case .failure:
-                    VStack(spacing: 12) {
-                        ContentUnavailableView(
-                            "Photo link expired",
-                            systemImage: "photo"
+            CachedEventImage(
+                eventID: model.access.id,
+                photo: photo,
+                variant: .display,
+                eventExpiresAt: AlbumMediaURLRefreshPolicy.date(
+                    model.access.event.expiresAt
+                ),
+                contentMode: .fit,
+                onFailure: {
+                    Task {
+                        await model.recoverMediaURLAfterFailure(
+                            photo.displayURL
                         )
-                        Button("Reload photo") {
-                            Task { await model.refresh() }
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(AppTheme.ink)
                     }
-                default:
+                }
+            ) {
+                if AlbumMediaURLRefreshPolicy.isUsable(
+                    photo.urlsExpireAt
+                ) {
                     ProgressView()
+                } else {
+                    ContentUnavailableView(
+                        "Refreshing photo",
+                        systemImage: "photo"
+                    )
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

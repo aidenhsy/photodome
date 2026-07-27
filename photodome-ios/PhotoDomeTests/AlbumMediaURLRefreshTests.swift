@@ -50,7 +50,8 @@ final class AlbumMediaURLRefreshTests: XCTestCase {
         let model = EventAlbumViewModel(
             access: access,
             onEventSignal: { _ in },
-            api: api
+            api: api,
+            snapshotStore: AlbumSnapshotMemoryStore()
         )
 
         await model.refresh()
@@ -84,7 +85,8 @@ final class AlbumMediaURLRefreshTests: XCTestCase {
         let model = EventAlbumViewModel(
             access: access,
             onEventSignal: { _ in },
-            api: api
+            api: api,
+            snapshotStore: AlbumSnapshotMemoryStore()
         )
 
         await model.refresh()
@@ -94,6 +96,84 @@ final class AlbumMediaURLRefreshTests: XCTestCase {
         let requestCount = await api.requestCount
         XCTAssertEqual(requestCount, 2)
         XCTAssertEqual(model.photos.first?.thumbnailURL, freshPhoto.thumbnailURL)
+    }
+
+    func testNearEndVisibilityLoadsAndMergesTheNextCursorPage() async {
+        let first = photo(
+            id: "first",
+            urlVersion: "one",
+            expiresAt: "2099-01-01T00:05:00.000Z"
+        )
+        let second = photo(
+            id: "second",
+            urlVersion: "two",
+            expiresAt: "2099-01-01T00:05:00.000Z"
+        )
+        let api = CursorAlbumPhotoListingStub(
+            pages: [
+                nil: AlbumPhotoPage(
+                    photos: [first],
+                    nextCursor: first.id,
+                    readyPhotoCount: 2
+                ),
+                first.id: AlbumPhotoPage(
+                    photos: [second],
+                    nextCursor: nil,
+                    readyPhotoCount: 2
+                ),
+            ]
+        )
+        let snapshotStore = AlbumSnapshotMemoryStore()
+        let model = EventAlbumViewModel(
+            access: access,
+            onEventSignal: { _ in },
+            api: api,
+            snapshotStore: snapshotStore
+        )
+
+        await model.refresh()
+        await model.photoBecameVisible(first.id)
+
+        XCTAssertEqual(model.photos.map(\.id), [first.id, second.id])
+        let cursors = await api.requestedCursors
+        XCTAssertEqual(cursors.count, 2)
+        XCTAssertNil(cursors[0])
+        XCTAssertEqual(cursors[1], first.id)
+        let snapshot = await snapshotStore.load(eventID: access.id)
+        XCTAssertEqual(snapshot?.photos.map(\.id), [first.id, second.id])
+    }
+
+    func testStableCacheKeyIgnoresRotatingSignedURL() {
+        let old = photo(
+            id: "photo",
+            urlVersion: "old-signature",
+            expiresAt: "2099-01-01T00:05:00.000Z"
+        )
+        let fresh = photo(
+            id: "photo",
+            urlVersion: "fresh-signature",
+            expiresAt: "2099-01-01T00:10:00.000Z"
+        )
+
+        let oldKey = EventImageCacheKey.make(
+            eventID: access.id,
+            photoID: old.id,
+            variant: .thumbnail
+        )
+        let freshKey = EventImageCacheKey.make(
+            eventID: access.id,
+            photoID: fresh.id,
+            variant: .thumbnail
+        )
+        let displayKey = EventImageCacheKey.make(
+            eventID: access.id,
+            photoID: fresh.id,
+            variant: .display
+        )
+
+        XCTAssertEqual(oldKey, freshKey)
+        XCTAssertNotEqual(oldKey, displayKey)
+        XCTAssertFalse(oldKey.contains("signature"))
     }
 
     private var access: StoredEventAccess {
@@ -119,7 +199,11 @@ final class AlbumMediaURLRefreshTests: XCTestCase {
     }
 
     private func page(_ photo: AlbumPhoto) -> AlbumPhotoPage {
-        AlbumPhotoPage(photos: [photo], readyPhotoCount: 1)
+        AlbumPhotoPage(
+            photos: [photo],
+            nextCursor: nil,
+            readyPhotoCount: 1
+        )
     }
 
     private func photo(
@@ -157,10 +241,45 @@ private actor AlbumPhotoListingStub: AlbumPhotoListing {
 
     func listPhotos(
         eventID: String,
-        capability: String
+        capability: String,
+        cursor: String?
     ) async throws -> AlbumPhotoPage {
         let page = pages[min(index, pages.count - 1)]
         index += 1
         return page
+    }
+}
+
+private actor CursorAlbumPhotoListingStub: AlbumPhotoListing {
+    private let pages: [String?: AlbumPhotoPage]
+    private(set) var requestedCursors: [String?] = []
+
+    init(pages: [String?: AlbumPhotoPage]) {
+        self.pages = pages
+    }
+
+    func listPhotos(
+        eventID: String,
+        capability: String,
+        cursor: String?
+    ) async throws -> AlbumPhotoPage {
+        requestedCursors.append(cursor)
+        return pages[cursor]!
+    }
+}
+
+private actor AlbumSnapshotMemoryStore: AlbumSnapshotStoring {
+    private var snapshots: [String: AlbumSnapshot] = [:]
+
+    func load(eventID: String) -> AlbumSnapshot? {
+        snapshots[eventID]
+    }
+
+    func save(_ snapshot: AlbumSnapshot) {
+        snapshots[snapshot.eventID] = snapshot
+    }
+
+    func remove(eventID: String) -> [String] {
+        snapshots.removeValue(forKey: eventID)?.photos.map(\.id) ?? []
     }
 }
