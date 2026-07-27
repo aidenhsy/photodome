@@ -54,6 +54,39 @@ final class MediaPipelineTests: XCTestCase {
         )
     }
 
+    func testCameraZoomPresetsExposeTripleCameraLensesAndTwoTimesCrop() {
+        XCTAssertEqual(
+            EventCameraCapturePolicy.displayedZoomPresets(
+                minimum: 1,
+                maximum: 20,
+                displayMultiplier: 0.5,
+                switchOverFactors: [2, 10]
+            ),
+            [0.5, 1, 2, 5]
+        )
+    }
+
+    func testCameraZoomPresetsAdaptToSimplerCameraHardware() {
+        XCTAssertEqual(
+            EventCameraCapturePolicy.displayedZoomPresets(
+                minimum: 1,
+                maximum: 10,
+                displayMultiplier: 0.5,
+                switchOverFactors: [2]
+            ),
+            [0.5, 1, 2]
+        )
+        XCTAssertEqual(
+            EventCameraCapturePolicy.displayedZoomPresets(
+                minimum: 1,
+                maximum: 1.5,
+                displayMultiplier: 1,
+                switchOverFactors: []
+            ),
+            [1]
+        )
+    }
+
     func testJPEGImportPreservesOriginalBytesAndMetadata()
         async throws
     {
