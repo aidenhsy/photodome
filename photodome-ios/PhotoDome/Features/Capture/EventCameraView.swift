@@ -96,9 +96,10 @@ struct EventCameraView: View {
                 flashMode: camera.flashMode,
                 supportsFlash: camera.supportsFlash,
                 zoomFactor: camera.zoomFactor,
+                zoomPresets: camera.zoomPresets,
                 close: { dismiss() },
                 cycleFlash: camera.cycleFlashMode,
-                cycleZoom: camera.cycleZoom,
+                selectZoom: camera.selectZoom,
                 capture: capturePhoto,
                 switchCamera: camera.switchCamera
             )
@@ -304,6 +305,41 @@ enum EventCameraCapturePolicy {
     ) -> CGFloat {
         min(max(current * scale, minimum), maximum)
     }
+
+    static func displayedZoomPresets(
+        minimum: CGFloat,
+        maximum: CGFloat,
+        displayMultiplier: CGFloat,
+        switchOverFactors: [CGFloat]
+    ) -> [CGFloat] {
+        let multiplier = max(displayMultiplier, 0.01)
+        let displayedMinimum = minimum * multiplier
+        let displayedMaximum = maximum * multiplier
+        var candidates = switchOverFactors.map { $0 * multiplier }
+
+        candidates.append(displayedMinimum)
+        candidates.append(1)
+        if displayedMaximum >= 2 {
+            candidates.append(2)
+        }
+
+        return
+            candidates
+            .map { ($0 * 10).rounded() / 10 }
+            .filter {
+                $0 >= displayedMinimum - 0.05
+                    && $0 <= displayedMaximum + 0.05
+            }
+            .sorted()
+            .reduce(into: [CGFloat]()) { presets, candidate in
+                guard
+                    presets.last.map({ abs($0 - candidate) >= 0.05 }) ?? true
+                else {
+                    return
+                }
+                presets.append(candidate)
+            }
+    }
 }
 
 private struct EventCameraControlOverlay: View {
@@ -317,9 +353,10 @@ private struct EventCameraControlOverlay: View {
     let flashMode: EventCameraFlashMode
     let supportsFlash: Bool
     let zoomFactor: CGFloat
+    let zoomPresets: [CGFloat]
     let close: () -> Void
     let cycleFlash: () -> Void
-    let cycleZoom: () -> Void
+    let selectZoom: (CGFloat) -> Void
     let capture: () -> Void
     let switchCamera: () -> Void
 
@@ -403,26 +440,44 @@ private struct EventCameraControlOverlay: View {
                         .background(.black.opacity(0.55), in: Capsule())
                 }
 
-                Button(action: cycleZoom) {
-                    Text(Self.zoomLabel(zoomFactor))
-                        .font(
-                            .system(
-                                .footnote,
-                                design: .rounded,
-                                weight: .bold
-                            )
+                HStack(spacing: 8) {
+                    ForEach(zoomPresets, id: \.self) { preset in
+                        let isSelected = abs(zoomFactor - preset) < 0.05
+                        Button {
+                            selectZoom(preset)
+                        } label: {
+                            Text(Self.zoomLabel(preset))
+                                .font(
+                                    .system(
+                                        .footnote,
+                                        design: .rounded,
+                                        weight: .bold
+                                    )
+                                )
+                                .foregroundStyle(
+                                    isSelected ? Color.black : Color.white
+                                )
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    isSelected
+                                        ? Color.white
+                                        : Color.black.opacity(0.55),
+                                    in: Circle()
+                                )
+                        }
+                        .disabled(!isCameraReady || isCapturing)
+                        .accessibilityLabel(
+                            "\(Self.zoomAccessibilityValue(preset)) zoom"
                         )
-                        .foregroundStyle(.white)
-                        .frame(minWidth: 48, minHeight: 36)
-                        .background(.black.opacity(0.55), in: Capsule())
+                        .accessibilityValue(
+                            isSelected ? "Selected" : "Not selected"
+                        )
+                        .accessibilityIdentifier(
+                            Self.zoomAccessibilityIdentifier(preset)
+                        )
+                    }
                 }
-                .disabled(!isCameraReady || isCapturing)
-                .accessibilityLabel("Zoom")
-                .accessibilityValue(Self.zoomAccessibilityValue(zoomFactor))
-                .accessibilityHint(
-                    "Double tap to change zoom, or pinch anywhere on the preview."
-                )
-                .accessibilityIdentifier("cameraZoomButton")
+                .accessibilityElement(children: .contain)
 
                 HStack {
                     Color.clear
@@ -492,6 +547,13 @@ private struct EventCameraControlOverlay: View {
     private static func zoomAccessibilityValue(_ value: CGFloat) -> String {
         String(format: "%.1f times", value)
     }
+
+    private static func zoomAccessibilityIdentifier(_ value: CGFloat) -> String {
+        "cameraZoomPresetButton_"
+            + zoomLabel(value)
+            .replacingOccurrences(of: ".", with: "_")
+            .replacingOccurrences(of: "×", with: "")
+    }
 }
 
 #if DEBUG
@@ -521,12 +583,13 @@ private struct EventCameraControlOverlay: View {
                     flashMode: flashMode,
                     supportsFlash: position == .back,
                     zoomFactor: zoomFactor,
+                    zoomPresets: position == .back ? [0.5, 1, 2, 5] : [1, 2],
                     close: {},
                     cycleFlash: {
                         flashMode = flashMode.next
                     },
-                    cycleZoom: {
-                        zoomFactor = zoomFactor < 1.5 ? 2 : 1
+                    selectZoom: { preset in
+                        zoomFactor = preset
                     },
                     capture: {
                         captureCount += 1
@@ -573,6 +636,7 @@ private final class EventCameraController: NSObject, ObservableObject,
     @Published private(set) var flashMode: EventCameraFlashMode = .auto
     @Published private(set) var supportsFlash = false
     @Published private(set) var zoomFactor: CGFloat = 1
+    @Published private(set) var zoomPresets: [CGFloat] = [1]
 
     let session = AVCaptureSession()
 
@@ -654,26 +718,18 @@ private final class EventCameraController: NSObject, ObservableObject,
         }
     }
 
-    func cycleZoom() {
+    func selectZoom(_ displayedFactor: CGFloat) {
         sessionQueue.async { [self] in
             guard
+                displayedFactor.isFinite,
+                displayedFactor > 0,
                 !isCaptureInProgress,
                 let device = currentInput?.device
             else {
                 return
             }
-            let displayZoom = displayedZoomFactor(
-                device.videoZoomFactor,
-                for: device
-            )
-            let maximumDisplayZoom = displayedZoomFactor(
-                usableMaximumZoom(for: device),
-                for: device
-            )
-            let targetDisplayZoom: CGFloat =
-                displayZoom < 1.5 && maximumDisplayZoom >= 2 ? 2 : 1
-            let target = targetDisplayZoom / displayZoomMultiplier(for: device)
-            setZoom(target, on: device)
+            let target = displayedFactor / displayZoomMultiplier(for: device)
+            setZoom(target, on: device, ramped: true)
         }
     }
 
@@ -876,14 +932,23 @@ private final class EventCameraController: NSObject, ObservableObject,
         }
     }
 
-    private func setZoom(_ value: CGFloat, on device: AVCaptureDevice) {
+    private func setZoom(
+        _ value: CGFloat,
+        on device: AVCaptureDevice,
+        ramped: Bool = false
+    ) {
         let target = min(
             max(value, device.minAvailableVideoZoomFactor),
             usableMaximumZoom(for: device)
         )
         do {
             try device.lockForConfiguration()
-            device.videoZoomFactor = target
+            device.cancelVideoZoomRamp()
+            if ramped {
+                device.ramp(toVideoZoomFactor: target, withRate: 8)
+            } else {
+                device.videoZoomFactor = target
+            }
             device.unlockForConfiguration()
             publishZoom(displayedZoomFactor(target, for: device))
         } catch {
@@ -909,6 +974,18 @@ private final class EventCameraController: NSObject, ObservableObject,
         for device: AVCaptureDevice
     ) -> CGFloat {
         max(device.displayVideoZoomFactorMultiplier, 0.01)
+    }
+
+    private func availableDisplayZoomPresets(
+        for device: AVCaptureDevice
+    ) -> [CGFloat] {
+        EventCameraCapturePolicy.displayedZoomPresets(
+            minimum: device.minAvailableVideoZoomFactor,
+            maximum: usableMaximumZoom(for: device),
+            displayMultiplier: displayZoomMultiplier(for: device),
+            switchOverFactors: device.virtualDeviceSwitchOverVideoZoomFactors
+                .map { CGFloat(truncating: $0) }
+        )
     }
 
     private func oppositePosition(
@@ -965,11 +1042,13 @@ private final class EventCameraController: NSObject, ObservableObject,
             device.videoZoomFactor,
             for: device
         )
+        let availableZoomPresets = availableDisplayZoomPresets(for: device)
         DispatchQueue.main.async { [weak self] in
             self?.position = currentPosition
             self?.canSwitchCamera = canSwitch
             self?.supportsFlash = flashAvailable
             self?.zoomFactor = currentZoom
+            self?.zoomPresets = availableZoomPresets
         }
     }
 

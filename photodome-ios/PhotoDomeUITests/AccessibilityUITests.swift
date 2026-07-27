@@ -319,15 +319,21 @@ final class AccessibilityUITests: XCTestCase {
         app.launch()
 
         let flash = app.buttons["cameraFlashButton"]
-        let zoom = app.buttons["cameraZoomButton"]
+        let halfZoom = app.buttons["cameraZoomPresetButton_0_5"]
+        let oneZoom = app.buttons["cameraZoomPresetButton_1"]
+        let twoZoom = app.buttons["cameraZoomPresetButton_2"]
+        let fiveZoom = app.buttons["cameraZoomPresetButton_5"]
         let switchCamera = app.buttons["cameraSwitchButton"]
         let shutter = app.buttons["cameraShutterButton"]
 
         XCTAssertTrue(flash.waitForExistence(timeout: 5))
         XCTAssertEqual(flash.label, "Flash Auto")
         XCTAssertTrue(flash.isEnabled)
-        XCTAssertTrue(zoom.exists)
-        XCTAssertEqual(zoom.value as? String, "1.0 times")
+        XCTAssertTrue(halfZoom.exists)
+        XCTAssertTrue(oneZoom.exists)
+        XCTAssertTrue(twoZoom.exists)
+        XCTAssertTrue(fiveZoom.exists)
+        XCTAssertEqual(oneZoom.value as? String, "Selected")
         XCTAssertTrue(switchCamera.exists)
         XCTAssertEqual(switchCamera.label, "Switch to front camera")
         XCTAssertTrue(shutter.exists)
@@ -335,14 +341,18 @@ final class AccessibilityUITests: XCTestCase {
         flash.tap()
         XCTAssertEqual(flash.label, "Flash On")
 
-        zoom.tap()
-        XCTAssertEqual(zoom.value as? String, "2.0 times")
+        halfZoom.tap()
+        XCTAssertEqual(halfZoom.value as? String, "Selected")
+        fiveZoom.tap()
+        XCTAssertEqual(fiveZoom.value as? String, "Selected")
 
         switchCamera.tap()
         XCTAssertEqual(switchCamera.label, "Switch to back camera")
         XCTAssertEqual(flash.label, "Flash unavailable")
         XCTAssertFalse(flash.isEnabled)
-        XCTAssertEqual(zoom.value as? String, "1.0 times")
+        XCTAssertFalse(halfZoom.exists)
+        XCTAssertFalse(fiveZoom.exists)
+        XCTAssertEqual(oneZoom.value as? String, "Selected")
 
         shutter.tap()
         XCTAssertEqual(
