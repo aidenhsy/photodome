@@ -146,6 +146,22 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertEqual(result.label, "Tapped bottom")
     }
 
+    func testInviteOffersCopyWithVisibleConfirmationButNotShare() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestInviteCodeCopy")
+        app.launch()
+
+        let copyButton = app.buttons["copyJoinCodeButton"]
+        XCTAssertTrue(copyButton.waitForExistence(timeout: 5))
+        XCTAssertEqual(copyButton.label, "Copy code")
+        XCTAssertFalse(app.buttons["Share invite"].exists)
+
+        copyButton.tap()
+
+        XCTAssertEqual(copyButton.label, "Code copied")
+    }
+
     func testAttendingCountOpensHostAttendeeManagement() {
         continueAfterFailure = false
         app = XCUIApplication()

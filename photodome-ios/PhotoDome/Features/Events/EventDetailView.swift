@@ -240,18 +240,7 @@ struct EventDetailView: View {
                         "Join code \(joinCode.map(String.init).joined(separator: " "))"
                     )
 
-                HStack {
-                    Button("Copy code") {
-                        UIPasteboard.general.string = joinCode
-                    }
-                    .buttonStyle(OutlineButtonStyle())
-
-                    ShareLink(item: invite.url) {
-                        Text("Share invite")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(OutlineButtonStyle())
-                }
+                InviteCodeCopyButton(joinCode: joinCode)
             } else {
                 Text("Rotate the code to create a new invite.")
                     .foregroundStyle(AppTheme.secondaryInk)
@@ -395,6 +384,51 @@ private struct AttendeeListView: View {
     }
 }
 
+struct InviteCodeCopyButton: View {
+    let joinCode: String
+
+    @State private var confirmationID: UUID?
+
+    private var showsConfirmation: Bool {
+        confirmationID != nil
+    }
+
+    var body: some View {
+        Button {
+            UIPasteboard.general.string = joinCode
+            UIAccessibility.post(
+                notification: .announcement,
+                argument: "Code copied"
+            )
+            withAnimation(.easeInOut(duration: 0.15)) {
+                confirmationID = UUID()
+            }
+        } label: {
+            Label(
+                showsConfirmation ? "Code copied" : "Copy code",
+                systemImage: showsConfirmation
+                    ? "checkmark.circle.fill"
+                    : "doc.on.doc"
+            )
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(OutlineButtonStyle())
+        .accessibilityIdentifier("copyJoinCodeButton")
+        .task(id: confirmationID) {
+            guard confirmationID != nil else {
+                return
+            }
+            try? await Task.sleep(for: .seconds(2))
+            guard !Task.isCancelled else {
+                return
+            }
+            withAnimation(.easeInOut(duration: 0.15)) {
+                confirmationID = nil
+            }
+        }
+    }
+}
+
 struct AttendeeCountControl: View {
     let memberCount: Int
     let canOpen: Bool
@@ -488,6 +522,13 @@ private struct AttendeeListContent: View {
 }
 
 #if DEBUG
+    struct InviteCodeCopyRegressionView: View {
+        var body: some View {
+            InviteCodeCopyButton(joinCode: "ABCD2345")
+                .padding(AppTheme.pagePadding)
+        }
+    }
+
     struct AttendeeListRegressionView: View {
         @State private var showsAttendees = false
 
