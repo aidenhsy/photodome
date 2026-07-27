@@ -52,6 +52,19 @@ struct EventMember: Equatable, Identifiable, Sendable {
     let isViewer: Bool
 }
 
+enum AttendeeManagementPolicy {
+    static func canOpenList(viewerRole: EventRole) -> Bool {
+        viewerRole == .host
+    }
+
+    static func canRemove(
+        _ member: EventMember,
+        viewerRole: EventRole
+    ) -> Bool {
+        viewerRole == .host && member.role == .guest
+    }
+}
+
 enum EventTimestampFormatter {
     static func localDateTime(
         _ value: String?,

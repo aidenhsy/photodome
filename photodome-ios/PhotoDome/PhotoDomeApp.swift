@@ -18,6 +18,10 @@ struct PhotoDomeApp: App {
                 "PhotoDomeUITestAlbumGridHitTargets"
             ) {
                 AlbumGridHitTargetRegressionView()
+            } else if ProcessInfo.processInfo.arguments.contains(
+                "PhotoDomeUITestAttendeeList"
+            ) {
+                AttendeeListRegressionView()
             } else {
                 ContentView()
             }
