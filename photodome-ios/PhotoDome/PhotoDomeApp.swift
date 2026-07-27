@@ -27,6 +27,10 @@ struct PhotoDomeApp: App {
             ) {
                 InviteCodeCopyRegressionView()
             } else if ProcessInfo.processInfo.arguments.contains(
+                "PhotoDomeUITestHostTransfer"
+            ) {
+                HostTransferRegressionView()
+            } else if ProcessInfo.processInfo.arguments.contains(
                 "PhotoDomeUITestAttendeeList"
             ) {
                 AttendeeListRegressionView()

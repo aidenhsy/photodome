@@ -163,6 +163,21 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertEqual(copyButton.label, "Code copied")
     }
 
+    func testHostTransferOffersQRButNotShareLink() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestHostTransfer")
+        app.launch()
+
+        let transferTitle = app.navigationBars["Transfer host"]
+        XCTAssertTrue(transferTitle.waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.images["One-time host transfer QR code"].exists
+                || app.otherElements["One-time host transfer QR code"].exists
+        )
+        XCTAssertFalse(app.buttons["Share transfer link"].exists)
+    }
+
     func testEventCanBeArchivedAndUnarchivedFromArchives() {
         continueAfterFailure = false
         app = XCUIApplication()
