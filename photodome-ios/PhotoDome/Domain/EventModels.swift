@@ -66,26 +66,41 @@ enum AttendeeManagementPolicy {
 }
 
 enum EventTimestampFormatter {
+    static func deletionCountdown(
+        _ value: String?,
+        now: Date = Date(),
+        calendar: Calendar = .current
+    ) -> String? {
+        guard let expiry = parse(value) else { return nil }
+
+        let today = calendar.startOfDay(for: now)
+        let expiryDay = calendar.startOfDay(for: expiry)
+        guard
+            let days = calendar.dateComponents(
+                [.day],
+                from: today,
+                to: expiryDay
+            ).day
+        else {
+            return nil
+        }
+
+        switch days {
+        case ...0:
+            return "Deletes today"
+        case 1:
+            return "Deletes tomorrow"
+        default:
+            return "Deletes in \(days) days"
+        }
+    }
+
     static func localDateTime(
         _ value: String?,
         timeZone: TimeZone = .current,
         locale: Locale = .current
     ) -> String? {
-        guard let value else { return nil }
-
-        let parser = ISO8601DateFormatter()
-        parser.formatOptions = [
-            .withInternetDateTime,
-            .withFractionalSeconds,
-        ]
-        let date: Date?
-        if let parsed = parser.date(from: value) {
-            date = parsed
-        } else {
-            parser.formatOptions = [.withInternetDateTime]
-            date = parser.date(from: value)
-        }
-        guard let date else { return nil }
+        guard let date = parse(value) else { return nil }
 
         var style = Date.FormatStyle(
             date: .abbreviated,
@@ -124,5 +139,21 @@ enum EventTimestampFormatter {
         return exposesNumericOffset
             ? String(localized: "local time", locale: locale)
             : name
+    }
+
+    private static func parse(_ value: String?) -> Date? {
+        guard let value else { return nil }
+
+        let parser = ISO8601DateFormatter()
+        parser.formatOptions = [
+            .withInternetDateTime,
+            .withFractionalSeconds,
+        ]
+        if let parsed = parser.date(from: value) {
+            return parsed
+        }
+
+        parser.formatOptions = [.withInternetDateTime]
+        return parser.date(from: value)
     }
 }

@@ -49,14 +49,14 @@ struct EventAlbumView: View {
                     matching: .images,
                     preferredItemEncoding: .current
                 ) {
-                    Label("Add", systemImage: "plus")
+                    Label("Photos", systemImage: "photo.on.rectangle")
                 }
                 .buttonStyle(AlbumActionButtonStyle(kind: .secondary))
                 .disabled(!acceptsNewUploads)
             }
 
             if !acceptsNewUploads {
-                Text("The host has closed new uploads.")
+                Text("New uploads are closed.")
                     .font(.footnote)
                     .foregroundStyle(AppTheme.secondaryInk)
             }
@@ -64,10 +64,7 @@ struct EventAlbumView: View {
             if !hasAlbumContent, !model.isLoading {
                 ContentUnavailableView(
                     "No photos yet",
-                    systemImage: "photo.on.rectangle.angled",
-                    description: Text(
-                        "Add the first photo. Everyone in the event will see it when processing finishes."
-                    )
+                    systemImage: "photo.on.rectangle.angled"
                 )
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 24)

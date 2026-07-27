@@ -16,6 +16,7 @@ final class AccessibilityUITests: XCTestCase {
 
     func testHomePassesAutomatedAccessibilityAudit() throws {
         launchApp()
+        XCTAssertFalse(app.buttons["emptyStateArchivesButton"].exists)
         try auditCurrentScreen()
     }
 
@@ -162,7 +163,7 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertEqual(copyButton.label, "Code copied")
     }
 
-    func testEventCanBeArchivedAndUnarchivedFromTheMenu() {
+    func testEventCanBeArchivedAndUnarchivedFromArchives() {
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments.append("PhotoDomeUITestEventArchive")
@@ -176,8 +177,7 @@ final class AccessibilityUITests: XCTestCase {
         archiveButton.tap()
         XCTAssertFalse(eventCard.exists)
 
-        app.buttons["menuButton"].tap()
-        let archivesButton = app.buttons["archivesMenuButton"]
+        let archivesButton = app.buttons["emptyStateArchivesButton"]
         XCTAssertTrue(archivesButton.waitForExistence(timeout: 2))
         archivesButton.tap()
         XCTAssertTrue(
@@ -211,19 +211,14 @@ final class AccessibilityUITests: XCTestCase {
         archiveButton.tap()
 
         XCTAssertTrue(
-            app.staticTexts["No events in Your Events."].waitForExistence(
+            app.staticTexts["No current events."].waitForExistence(
                 timeout: 2
             )
-        )
-        XCTAssertTrue(
-            app.staticTexts[
-                "You have 1 archived event. View or restore it at any time."
-            ].exists
         )
 
         let emptyStateArchives = app.buttons["emptyStateArchivesButton"]
         XCTAssertTrue(emptyStateArchives.exists)
-        XCTAssertEqual(emptyStateArchives.label, "View Archives")
+        XCTAssertEqual(emptyStateArchives.label, "View 1 archived event")
         emptyStateArchives.tap()
 
         XCTAssertTrue(

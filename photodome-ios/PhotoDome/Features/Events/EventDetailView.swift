@@ -6,11 +6,13 @@ struct EventDetailView: View {
     @ObservedObject var model: EventAppViewModel
     let initiallyPresentsCamera: Bool
     let cameraPresentationRequestID: UUID?
+    let onInitialInvitePresented: () -> Void
 
     @State private var showsRotationConfirmation = false
     @State private var showsEndConfirmation = false
     @State private var showsRestrictionConfirmation = false
     @State private var showsAttendees = false
+    @State private var showsInvite: Bool
     @State private var transfer: HostTransfer?
     @State private var isWorking = false
 
@@ -18,12 +20,16 @@ struct EventDetailView: View {
         eventID: String,
         model: EventAppViewModel,
         initiallyPresentsCamera: Bool = false,
-        cameraPresentationRequestID: UUID? = nil
+        cameraPresentationRequestID: UUID? = nil,
+        initiallyPresentsInvite: Bool = false,
+        onInitialInvitePresented: @escaping () -> Void = {}
     ) {
         self.eventID = eventID
         self.model = model
         self.initiallyPresentsCamera = initiallyPresentsCamera
         self.cameraPresentationRequestID = cameraPresentationRequestID
+        self.onInitialInvitePresented = onInitialInvitePresented
+        _showsInvite = State(initialValue: initiallyPresentsInvite)
     }
 
     var body: some View {
@@ -33,13 +39,7 @@ struct EventDetailView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         summary(access)
 
-                        if access.event.role == .host {
-                            hostInvite(access)
-                        }
-
-                        if access.event.state == .ended
-                            || (access.event.state == .live
-                                && access.event.role == .host),
+                        if access.event.state == .ended,
                             (access.event.readyPhotoCount ?? 0) > 0
                         {
                             EventTakeHomeView(access: access)
@@ -69,6 +69,19 @@ struct EventDetailView: View {
                 .refreshable { await model.refresh(eventID: eventID) }
                 .navigationTitle(access.event.name)
                 .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    if access.event.role == .host {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button {
+                                showsInvite = true
+                            } label: {
+                                Image(systemName: "person.badge.plus")
+                            }
+                            .accessibilityLabel("Invite people")
+                            .accessibilityIdentifier("inviteButton")
+                        }
+                    }
+                }
             } else {
                 ContentUnavailableView(
                     "Event unavailable",
@@ -78,6 +91,11 @@ struct EventDetailView: View {
         }
         .sheet(item: $transfer) { transfer in
             HostTransferView(transfer: transfer)
+        }
+        .sheet(isPresented: $showsInvite) {
+            if let access = model.access(eventID: eventID) {
+                EventInviteView(access: access)
+            }
         }
         .sheet(isPresented: $showsAttendees) {
             if let access = model.access(eventID: eventID),
@@ -89,65 +107,79 @@ struct EventDetailView: View {
             }
         }
         .task {
+            if showsInvite {
+                onInitialInvitePresented()
+            }
             await model.refresh(eventID: eventID)
             await model.loadMembers(eventID: eventID)
         }
     }
 
     private func summary(_ access: StoredEventAccess) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(
-                access.event.state == .live
-                    ? "LIVE EVENT" : access.event.state.rawValue.uppercased()
-            )
-            .font(AppTheme.eyebrow)
-            .foregroundStyle(AppTheme.secondaryInk)
-
-            Text("Hosted by \(access.event.hostDisplayName ?? "Host")")
-                .foregroundStyle(AppTheme.secondaryInk)
-
-            VStack(alignment: .leading, spacing: 5) {
-                if let started = EventTimestampFormatter.localDateTime(
-                    access.event.createdAt
-                ) {
-                    Text("Started \(started)")
-                }
-                if access.event.state == .ended,
-                    let ended = EventTimestampFormatter.localDateTime(
-                        access.event.endedAt
-                    )
-                {
-                    Text("Ended \(ended)")
-                }
-            }
-            .font(.footnote)
-            .foregroundStyle(AppTheme.secondaryInk)
-
-            HStack(spacing: 18) {
-                attendingControl(access)
-                Label(
-                    access.event.role == .host ? "You’re host" : "You’re a guest",
-                    systemImage: access.event.role == .host
-                        ? "key" : "person"
+        VStack(alignment: .leading, spacing: PhotoDomeTokens.Space.x2) {
+            HStack {
+                PhotoDomeLifecyclePill(
+                    title: lifecycleTitle(for: access.event.state),
+                    tone: lifecycleTone(for: access.event.state)
                 )
+
+                Spacer()
+
+                attendingControl(access)
             }
             .font(.system(.footnote, design: .rounded, weight: .medium))
             .foregroundStyle(AppTheme.secondaryInk)
 
+            if access.event.role == .guest {
+                Text(
+                    "Hosted by \(access.event.hostDisplayName ?? "Host")"
+                )
+                .font(.system(.footnote, design: .rounded))
+                .foregroundStyle(AppTheme.secondaryInk)
+            }
+
             if access.event.state == .ended {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(
+                HStack {
+                    Label(
                         access.event.uploadsRestrictedAt == nil
-                            ? "Uploads remain open"
-                            : "New uploads are restricted"
+                            ? "Uploads open"
+                            : "Uploads closed",
+                        systemImage: access.event.uploadsRestrictedAt == nil
+                            ? "arrow.up.circle"
+                            : "nosign"
                     )
-                    if let expiry = formattedDate(access.event.expiresAt) {
-                        Text("Photos expire \(expiry)")
+
+                    Spacer()
+
+                    if let countdown =
+                        EventTimestampFormatter.deletionCountdown(
+                            access.event.expiresAt
+                        )
+                    {
+                        Text(countdown)
                     }
                 }
                 .font(.footnote)
                 .foregroundStyle(AppTheme.secondaryInk)
             }
+        }
+    }
+
+    private func lifecycleTitle(for lifecycle: EventLifecycle) -> String {
+        switch lifecycle {
+        case .live: "Live"
+        case .ended: "Ended"
+        case .expiring: "Expiring"
+        }
+    }
+
+    private func lifecycleTone(
+        for lifecycle: EventLifecycle
+    ) -> PhotoDomeLifecycleTone {
+        switch lifecycle {
+        case .live: .live
+        case .ended: .neutral
+        case .expiring: .danger
         }
     }
 
@@ -161,40 +193,6 @@ struct EventDetailView: View {
         ) {
             showsAttendees = true
         }
-    }
-
-    private func hostInvite(_ access: StoredEventAccess) -> some View {
-        VStack(alignment: .center, spacing: 16) {
-            Text("INVITE PEOPLE")
-                .font(AppTheme.eyebrow)
-                .foregroundStyle(AppTheme.secondaryInk)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            if let joinCode = access.joinCode {
-                let invite = InvitePayload.join(code: joinCode)
-
-                QRCodeView(
-                    url: invite.url,
-                    size: 220,
-                    accessibilityLabel: "Event invite QR code"
-                )
-
-                Text(joinCode)
-                    .font(.system(.title, design: .monospaced, weight: .bold))
-                    .tracking(3)
-                    .accessibilityLabel(
-                        "Join code \(joinCode.map(String.init).joined(separator: " "))"
-                    )
-
-                InviteCodeCopyButton(joinCode: joinCode)
-            } else {
-                Text("Rotate the code to create a new invite.")
-                    .foregroundStyle(AppTheme.secondaryInk)
-            }
-        }
-        .padding(20)
-        .background(AppTheme.softFill)
-        .clipShape(RoundedRectangle(cornerRadius: AppTheme.cornerRadius))
     }
 
     private func hostControls(_ access: StoredEventAccess) -> some View {
@@ -289,18 +287,64 @@ struct EventDetailView: View {
                 }
             }
 
-            Text(
-                "Host transfer creates a one-time QR that expires shortly. Accepting it removes host control from this device."
-            )
-            .font(.footnote)
-            .foregroundStyle(AppTheme.secondaryInk)
         }
     }
 
-    private func formattedDate(_ value: String?) -> String? {
-        EventTimestampFormatter.localDateTime(value)
-    }
+}
 
+private struct EventInviteView: View {
+    let access: StoredEventAccess
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: PhotoDomeTokens.Space.x4) {
+                if let joinCode = access.joinCode {
+                    let invite = InvitePayload.join(code: joinCode)
+
+                    QRCodeView(
+                        url: invite.url,
+                        size: 240,
+                        accessibilityLabel: "Event invite QR code"
+                    )
+
+                    Text(joinCode)
+                        .font(
+                            .system(
+                                .title,
+                                design: .monospaced,
+                                weight: .bold
+                            )
+                        )
+                        .tracking(3)
+                        .accessibilityLabel(
+                            "Join code \(joinCode.map(String.init).joined(separator: " "))"
+                        )
+
+                    InviteCodeCopyButton(joinCode: joinCode)
+                } else {
+                    ContentUnavailableView(
+                        "Invite unavailable",
+                        systemImage: "qrcode",
+                        description: Text(
+                            "Create a new code from Host controls."
+                        )
+                    )
+                }
+
+                Spacer()
+            }
+            .padding(AppTheme.pagePadding)
+            .navigationTitle("Invite people")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.large])
+    }
 }
 
 private struct AttendeeListView: View {

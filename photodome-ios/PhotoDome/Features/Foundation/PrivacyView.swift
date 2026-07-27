@@ -13,24 +13,26 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    NavigationLink {
-                        EditDisplayNameView(
-                            displayName: profile.displayName ?? "",
-                            onSave: onSaveDisplayName
-                        )
-                    } label: {
-                        LabeledContent(
-                            "Your name",
-                            value: profile.displayName ?? "Not set"
-                        )
+                if !requiresPermissionSetup {
+                    Section {
+                        NavigationLink {
+                            EditDisplayNameView(
+                                displayName: profile.displayName ?? "",
+                                onSave: onSaveDisplayName
+                            )
+                        } label: {
+                            LabeledContent(
+                                "Your name",
+                                value: profile.displayName ?? "Not set"
+                            )
+                        }
                     }
                 }
 
                 if requiresPermissionSetup {
                     Section {
                         Text(
-                            "Set up Camera, Photos, and Precise Location once before creating or joining an event. You can change these permissions here later."
+                            "Allow Camera, Photos, and Precise Location once."
                         )
                     }
                 }
@@ -334,13 +336,6 @@ private struct PrivacyDetailsView: View {
                 sectionHeader("Tracking and analytics")
             }
 
-            Section {
-                Text(
-                    "The public privacy-policy URL, legal owner, and support contact are required before external TestFlight distribution and remain to be configured."
-                )
-                .font(.footnote)
-                .foregroundStyle(AppTheme.secondaryInk)
-            }
         }
         .navigationTitle("Privacy and data")
         .navigationBarTitleDisplayMode(.inline)
