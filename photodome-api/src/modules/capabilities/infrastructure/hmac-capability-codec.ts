@@ -52,6 +52,23 @@ export class HmacCapabilityCodec implements CapabilityCodec {
     return this.hash('join-code', this.normalizeJoinCode(value));
   }
 
+  deriveGuestCapability(
+    joinCode: string,
+    installationIdentity: string,
+  ): string {
+    const binding = this.guestJoinBinding(joinCode, installationIdentity);
+    return `pdc_${this.digest('guest-event-capability', binding).toString(
+      'base64url',
+    )}`;
+  }
+
+  hashGuestJoinBinding(joinCode: string, installationIdentity: string): string {
+    return this.hash(
+      'guest-join-binding',
+      this.guestJoinBinding(joinCode, installationIdentity),
+    );
+  }
+
   matchesHash(candidateHash: string, storedHash: string): boolean {
     const candidate = Buffer.from(candidateHash, 'hex');
     const stored = Buffer.from(storedHash, 'hex');
@@ -63,8 +80,19 @@ export class HmacCapabilityCodec implements CapabilityCodec {
   }
 
   private hash(purpose: string, value: string): string {
+    return this.digest(purpose, value).toString('hex');
+  }
+
+  private digest(purpose: string, value: string): Buffer {
     return createHmac('sha256', this.pepper)
       .update(`${purpose}\0${value}`)
-      .digest('hex');
+      .digest();
+  }
+
+  private guestJoinBinding(
+    joinCode: string,
+    installationIdentity: string,
+  ): string {
+    return `${this.normalizeJoinCode(joinCode)}\0${installationIdentity.trim()}`;
   }
 }

@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, Post, UseFilters } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Headers,
+  HttpCode,
+  Post,
+  UseFilters,
+} from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -49,7 +57,22 @@ export class EventsPublicController {
   @ApiNotFoundResponse({
     description: 'Invite invalid, rotated, expired, or unavailable.',
   })
-  async join(@Body() input: JoinEventDto): Promise<EventAccessDto> {
-    return EventAccessDto.fromDomain(await this.events.joinEvent(input));
+  async join(
+    @Body() input: JoinEventDto,
+    @Headers('x-photodome-installation-id')
+    installationIdentity: string | undefined,
+  ): Promise<EventAccessDto> {
+    const normalizedIdentity = installationIdentity?.trim();
+    if (!normalizedIdentity || normalizedIdentity.length > 128) {
+      throw new BadRequestException(
+        'A valid installation identity is required.',
+      );
+    }
+    return EventAccessDto.fromDomain(
+      await this.events.joinEvent({
+        ...input,
+        installationIdentity: normalizedIdentity,
+      }),
+    );
   }
 }

@@ -85,6 +85,7 @@ describe('Event expiry and permanent cleanup (e2e)', () => {
     const guest = (
       await request(server)
         .post('/v1/events/join')
+        .set('X-PhotoDome-Installation-ID', 'expiry-guest-installation')
         .send({ joinCode: host.joinCode, displayName: 'Expiry Guest' })
         .expect(200)
     ).body as GuestAccess;

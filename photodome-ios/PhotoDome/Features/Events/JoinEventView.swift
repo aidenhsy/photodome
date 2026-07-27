@@ -108,8 +108,14 @@ struct JoinEventView: View {
         }
         .sheet(isPresented: $showsScanner) {
             QRScannerView { payload in
+                guard !isWorking else { return }
+                isWorking = true
                 Task {
-                    if await handlePayload(payload) { dismiss() }
+                    if await handlePayload(payload) {
+                        dismiss()
+                    } else {
+                        isWorking = false
+                    }
                 }
             }
         }

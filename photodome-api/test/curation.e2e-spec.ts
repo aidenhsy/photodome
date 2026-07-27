@@ -66,12 +66,14 @@ describe('Private curation and original download (e2e)', () => {
     const guestOne = (
       await request(server)
         .post('/v1/events/join')
+        .set('X-PhotoDome-Installation-ID', 'curation-guest-one')
         .send({ joinCode: host.joinCode, displayName: 'First Guest' })
         .expect(200)
     ).body as EventAccessBody;
     const guestTwo = (
       await request(server)
         .post('/v1/events/join')
+        .set('X-PhotoDome-Installation-ID', 'curation-guest-two')
         .send({ joinCode: host.joinCode, displayName: 'Second Guest' })
         .expect(200)
     ).body as EventAccessBody;

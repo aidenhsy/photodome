@@ -4,6 +4,7 @@ import {
   EventState as PrismaEventState,
   Prisma,
 } from '@prisma/client';
+import { randomBytes } from 'node:crypto';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import type {
   EventMemberCredential,
@@ -23,6 +24,7 @@ import {
 import type {
   CreatedEvent,
   EventRepository,
+  JoinedEvent,
 } from '../application/ports/event.repository';
 
 const MAX_ACTIVE_EVENT_MEMBERS = 100;
@@ -93,7 +95,8 @@ export class PrismaEventRepository implements EventRepository {
     joinCodeHash: string;
     guestDisplayName: string;
     guestCapabilityHash: string;
-  }): Promise<EventSnapshot> {
+    guestJoinBindingHash: string;
+  }): Promise<JoinedEvent> {
     return this.serializable(async (transaction) => {
       const event = await transaction.event.findUnique({
         where: { joinCodeHash: input.joinCodeHash },
@@ -102,6 +105,14 @@ export class PrismaEventRepository implements EventRepository {
         throw new InvalidInviteError();
       }
 
+      const existingMember = await transaction.eventMember.findUnique({
+        where: {
+          eventId_joinBindingHash: {
+            eventId: event.id,
+            joinBindingHash: input.guestJoinBindingHash,
+          },
+        },
+      });
       const [memberCount, readyPhotoCount] = await Promise.all([
         transaction.eventMember.count({
           where: { eventId: event.id, removedAt: null },
@@ -110,6 +121,16 @@ export class PrismaEventRepository implements EventRepository {
           where: { eventId: event.id, state: 'READY' },
         }),
       ]);
+      if (existingMember && !existingMember.removedAt) {
+        return {
+          event: this.toSnapshot(event, memberCount, readyPhotoCount, {
+            eventId: event.id,
+            memberId: existingMember.id,
+            role: 'GUEST',
+          }),
+          memberWasCreated: false,
+        };
+      }
       if (memberCount >= MAX_ACTIVE_EVENT_MEMBERS) {
         throw new EventCapacityError();
       }
@@ -120,15 +141,19 @@ export class PrismaEventRepository implements EventRepository {
           role: PrismaEventMemberRole.GUEST,
           displayName: input.guestDisplayName,
           capabilityHash: input.guestCapabilityHash,
+          joinBindingHash: input.guestJoinBindingHash,
         },
       });
 
-      return this.toSnapshot(event, memberCount + 1, readyPhotoCount, {
-        eventId: event.id,
-        memberId: member.id,
-        role: 'GUEST',
-      });
-    });
+      return {
+        event: this.toSnapshot(event, memberCount + 1, readyPhotoCount, {
+          eventId: event.id,
+          memberId: member.id,
+          role: 'GUEST',
+        }),
+        memberWasCreated: true,
+      };
+    }, true);
   }
 
   async getSnapshot(eventId: string, memberId: string): Promise<EventSnapshot> {
@@ -362,6 +387,8 @@ export class PrismaEventRepository implements EventRepository {
       data: {
         removedAt: now,
         liveActivityToken: null,
+        joinBindingHash: null,
+        capabilityHash: randomBytes(32).toString('hex'),
       },
     });
     if (result.count !== 1) {
@@ -462,6 +489,7 @@ export class PrismaEventRepository implements EventRepository {
 
   private async serializable<T>(
     operation: (transaction: Prisma.TransactionClient) => Promise<T>,
+    retryUniqueConflicts = false,
   ): Promise<T> {
     for (let attempt = 0; attempt < SERIALIZABLE_RETRY_ATTEMPTS; attempt += 1) {
       try {
@@ -472,7 +500,8 @@ export class PrismaEventRepository implements EventRepository {
         if (
           !(
             error instanceof Prisma.PrismaClientKnownRequestError &&
-            error.code === 'P2034'
+            (error.code === 'P2034' ||
+              (retryUniqueConflicts && error.code === 'P2002'))
           ) ||
           attempt === SERIALIZABLE_RETRY_ATTEMPTS - 1
         ) {

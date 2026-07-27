@@ -120,6 +120,7 @@ async function verify(): Promise<void> {
           joinCodeHash: hash(`join-${eventId}`),
           guestDisplayName: 'Overflow Guest',
           guestCapabilityHash: hash(`overflow-${eventId}`),
+          guestJoinBindingHash: hash(`overflow-binding-${eventId}`),
         }),
       EventCapacityError,
       '101st attendee was admitted',
