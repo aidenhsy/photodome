@@ -10,7 +10,7 @@ struct EventDetailView: View {
     @State private var showsRotationConfirmation = false
     @State private var showsEndConfirmation = false
     @State private var showsRestrictionConfirmation = false
-    @State private var memberPendingRemoval: EventMember?
+    @State private var showsAttendees = false
     @State private var transfer: HostTransfer?
     @State private var isWorking = false
 
@@ -35,7 +35,6 @@ struct EventDetailView: View {
 
                         if access.event.role == .host {
                             hostInvite(access)
-                            attendeeControls(access)
                         }
 
                         if access.event.state == .ended
@@ -124,34 +123,6 @@ struct EventDetailView: View {
                         "New photos can’t be started. Uploads that were already admitted can still finish or retry."
                     )
                 }
-                .confirmationDialog(
-                    "Remove this attendee?",
-                    isPresented: Binding(
-                        get: { memberPendingRemoval != nil },
-                        set: { if !$0 { memberPendingRemoval = nil } }
-                    ),
-                    titleVisibility: .visible
-                ) {
-                    Button("Remove attendee", role: .destructive) {
-                        guard let member = memberPendingRemoval else { return }
-                        memberPendingRemoval = nil
-                        Task {
-                            isWorking = true
-                            _ = await model.removeMember(
-                                eventID: eventID,
-                                memberID: member.id
-                            )
-                            isWorking = false
-                        }
-                    }
-                    Button("Cancel", role: .cancel) {
-                        memberPendingRemoval = nil
-                    }
-                } message: {
-                    Text(
-                        "Their event access is revoked immediately on every open screen."
-                    )
-                }
             } else {
                 ContentUnavailableView(
                     "Event unavailable",
@@ -161,6 +132,15 @@ struct EventDetailView: View {
         }
         .sheet(item: $transfer) { transfer in
             HostTransferView(transfer: transfer)
+        }
+        .sheet(isPresented: $showsAttendees) {
+            if let access = model.access(eventID: eventID),
+                AttendeeManagementPolicy.canOpenList(
+                    viewerRole: access.event.role
+                )
+            {
+                AttendeeListView(access: access, model: model)
+            }
         }
         .task {
             await model.refresh(eventID: eventID)
@@ -198,10 +178,7 @@ struct EventDetailView: View {
             .foregroundStyle(AppTheme.secondaryInk)
 
             HStack(spacing: 18) {
-                Label(
-                    "\(access.event.memberCount) attending",
-                    systemImage: "person.2"
-                )
+                attendingControl(access)
                 Label(
                     access.event.role == .host ? "You’re host" : "You’re a guest",
                     systemImage: access.event.role == .host
@@ -225,6 +202,18 @@ struct EventDetailView: View {
                 .font(.footnote)
                 .foregroundStyle(AppTheme.secondaryInk)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func attendingControl(_ access: StoredEventAccess) -> some View {
+        AttendeeCountControl(
+            memberCount: access.event.memberCount,
+            canOpen: AttendeeManagementPolicy.canOpenList(
+                viewerRole: access.event.role
+            )
+        ) {
+            showsAttendees = true
         }
     }
 
@@ -319,60 +308,227 @@ struct EventDetailView: View {
         }
     }
 
-    private func attendeeControls(
-        _ access: StoredEventAccess
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("ATTENDEES")
-                .font(AppTheme.eyebrow)
-                .foregroundStyle(AppTheme.secondaryInk)
-
-            let guests = (model.membersByEvent[access.id] ?? []).filter {
-                $0.role == .guest
-            }
-            if guests.isEmpty {
-                Text("No guests are currently in this event.")
-                    .font(.footnote)
-                    .foregroundStyle(AppTheme.secondaryInk)
-            } else {
-                ForEach(guests) { member in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(member.displayName)
-                                .font(
-                                    .system(
-                                        .body,
-                                        design: .rounded,
-                                        weight: .semibold
-                                    )
-                                )
-                            if let joined = formattedDate(member.joinedAt) {
-                                Text("Joined \(joined)")
-                                    .font(.caption)
-                                    .foregroundStyle(AppTheme.secondaryInk)
-                            }
-                        }
-                        Spacer()
-                        Button("Remove", role: .destructive) {
-                            memberPendingRemoval = member
-                        }
-                        .disabled(isWorking)
-                    }
-                    .padding(14)
-                    .background(AppTheme.softFill)
-                    .clipShape(
-                        RoundedRectangle(cornerRadius: AppTheme.cornerRadius)
-                    )
-                }
-            }
-        }
-    }
-
     private func formattedDate(_ value: String?) -> String? {
         EventTimestampFormatter.localDateTime(value)
     }
 
 }
+
+private struct AttendeeListView: View {
+    let access: StoredEventAccess
+    @ObservedObject var model: EventAppViewModel
+    @Environment(\.dismiss) private var dismiss
+    @State private var memberPendingRemoval: EventMember?
+    @State private var isWorking = false
+
+    private var members: [EventMember]? {
+        model.membersByEvent[access.id]
+    }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let members {
+                    AttendeeListContent(
+                        members: members,
+                        viewerRole: access.event.role,
+                        isWorking: isWorking
+                    ) { member in
+                        memberPendingRemoval = member
+                    }
+                    .refreshable {
+                        await model.loadMembers(eventID: access.id)
+                    }
+                } else {
+                    ProgressView("Loading attendees…")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+            .navigationTitle("Attendees")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .task {
+                await model.loadMembers(eventID: access.id)
+            }
+            .confirmationDialog(
+                removalTitle,
+                isPresented: Binding(
+                    get: { memberPendingRemoval != nil },
+                    set: { if !$0 { memberPendingRemoval = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Remove attendee", role: .destructive) {
+                    guard let member = memberPendingRemoval else {
+                        return
+                    }
+                    memberPendingRemoval = nil
+                    Task {
+                        isWorking = true
+                        _ = await model.removeMember(
+                            eventID: access.id,
+                            memberID: member.id
+                        )
+                        isWorking = false
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    memberPendingRemoval = nil
+                }
+            } message: {
+                Text(
+                    "Their event access is revoked immediately on every open screen."
+                )
+            }
+        }
+    }
+
+    private var removalTitle: String {
+        guard let memberPendingRemoval else {
+            return "Remove this attendee?"
+        }
+        return "Remove \(memberPendingRemoval.displayName)?"
+    }
+}
+
+struct AttendeeCountControl: View {
+    let memberCount: Int
+    let canOpen: Bool
+    let open: () -> Void
+
+    @ViewBuilder
+    var body: some View {
+        let label = Label(
+            "\(memberCount) attending",
+            systemImage: "person.2"
+        )
+
+        if canOpen {
+            Button(action: open) {
+                label
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint("Opens the attendee list.")
+            .accessibilityIdentifier("attendeeCountButton")
+        } else {
+            label
+        }
+    }
+}
+
+private struct AttendeeListContent: View {
+    let members: [EventMember]
+    let viewerRole: EventRole
+    let isWorking: Bool
+    let remove: (EventMember) -> Void
+
+    var body: some View {
+        List(members) { member in
+            attendeeRow(member)
+        }
+        .listStyle(.plain)
+    }
+
+    private func attendeeRow(_ member: EventMember) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "person.crop.circle.fill")
+                .font(.title2)
+                .foregroundStyle(AppTheme.secondaryInk)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 6) {
+                    Text(member.displayName)
+                        .font(
+                            .system(
+                                .body,
+                                design: .rounded,
+                                weight: .semibold
+                            )
+                        )
+                    if member.isViewer {
+                        Text("You")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(AppTheme.secondaryInk)
+                    }
+                    if member.role == .host {
+                        Text("Host")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(AppTheme.secondaryInk)
+                    }
+                }
+
+                if let joined = EventTimestampFormatter.localDateTime(
+                    member.joinedAt
+                ) {
+                    Text("Joined \(joined)")
+                        .font(.caption)
+                        .foregroundStyle(AppTheme.secondaryInk)
+                }
+            }
+
+            Spacer(minLength: 8)
+
+            if AttendeeManagementPolicy.canRemove(
+                member,
+                viewerRole: viewerRole
+            ) {
+                Button("Remove", role: .destructive) {
+                    remove(member)
+                }
+                .disabled(isWorking)
+                .accessibilityIdentifier("removeAttendee.\(member.id)")
+            }
+        }
+    }
+}
+
+#if DEBUG
+    struct AttendeeListRegressionView: View {
+        @State private var showsAttendees = false
+
+        private let members = [
+            EventMember(
+                id: "host",
+                displayName: "Host Person",
+                role: .host,
+                joinedAt: "2026-07-28T00:00:00.000Z",
+                isViewer: true
+            ),
+            EventMember(
+                id: "guest",
+                displayName: "Guest Person",
+                role: .guest,
+                joinedAt: "2026-07-28T00:01:00.000Z",
+                isViewer: false
+            ),
+        ]
+
+        var body: some View {
+            AttendeeCountControl(
+                memberCount: members.count,
+                canOpen: true
+            ) {
+                showsAttendees = true
+            }
+            .sheet(isPresented: $showsAttendees) {
+                NavigationStack {
+                    AttendeeListContent(
+                        members: members,
+                        viewerRole: .host,
+                        isWorking: false
+                    ) { _ in }
+                    .navigationTitle("Attendees")
+                    .navigationBarTitleDisplayMode(.inline)
+                }
+            }
+        }
+    }
+#endif
 
 private struct HostTransferView: View {
     let transfer: HostTransfer

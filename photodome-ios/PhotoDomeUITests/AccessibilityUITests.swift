@@ -146,6 +146,25 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertEqual(result.label, "Tapped bottom")
     }
 
+    func testAttendingCountOpensHostAttendeeManagement() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestAttendeeList")
+        app.launch()
+
+        let attendeeCount = app.buttons["attendeeCountButton"]
+        XCTAssertTrue(attendeeCount.waitForExistence(timeout: 5))
+        attendeeCount.tap()
+
+        XCTAssertTrue(
+            app.navigationBars["Attendees"].waitForExistence(timeout: 5)
+        )
+        XCTAssertTrue(app.staticTexts["Host Person"].exists)
+        XCTAssertTrue(app.staticTexts["Guest Person"].exists)
+        XCTAssertFalse(app.buttons["removeAttendee.host"].exists)
+        XCTAssertTrue(app.buttons["removeAttendee.guest"].exists)
+    }
+
     private func auditCurrentScreen() throws {
         try app.performAccessibilityAudit(
             for: [
