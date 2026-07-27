@@ -15,6 +15,9 @@ struct EventTakeHomeView: View {
                     showsReview = true
                 } label: {
                     Label("Choose photos", systemImage: "hand.draw")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .allowsTightening(true)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(OutlineButtonStyle())
@@ -32,6 +35,9 @@ struct EventTakeHomeView: View {
                             ),
                             systemImage: "square.and.arrow.down"
                         )
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .allowsTightening(true)
                         .frame(maxWidth: .infinity)
                     }
                 }
