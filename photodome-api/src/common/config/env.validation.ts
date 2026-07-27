@@ -169,6 +169,11 @@ export function validateEnvironment(
     if (gcsApiEndpoint.length > 0) {
       throw new Error('GCS_API_ENDPOINT must be empty in production');
     }
+    if (/(^|[._-])(dev|development)([._-]|$)/.test(mediaBucketName)) {
+      throw new Error(
+        'MEDIA_BUCKET_NAME must not identify a development bucket in production',
+      );
+    }
     if (!metricsBearerToken) {
       throw new Error('METRICS_BEARER_TOKEN is required in production');
     }

@@ -1,5 +1,9 @@
 import { Storage } from '@google-cloud/storage';
-import { Injectable, type OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  type OnApplicationBootstrap,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Environment } from '../../../common/config/env.validation';
 
@@ -60,6 +64,8 @@ export function findMediaBucketPolicyViolations(
 
 @Injectable()
 export class GcsMediaBucketValidator implements OnApplicationBootstrap {
+  private readonly logger = new Logger(GcsMediaBucketValidator.name);
+
   constructor(private readonly config: ConfigService<Environment, true>) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -86,5 +92,12 @@ export class GcsMediaBucketValidator implements OnApplicationBootstrap {
         )}`,
       );
     }
+
+    this.logger.log({
+      operation: 'media_bucket_validation',
+      projectId,
+      bucketName,
+      outcome: 'success',
+    });
   }
 }

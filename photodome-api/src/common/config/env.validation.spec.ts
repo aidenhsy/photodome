@@ -45,6 +45,11 @@ describe('validateEnvironment production safety', () => {
       },
       'CAPABILITY_PEPPER',
     ],
+    [
+      'a development media bucket',
+      { MEDIA_BUCKET_NAME: 'photodome-dev' },
+      'MEDIA_BUCKET_NAME',
+    ],
     ['debug logging', { LOG_LEVEL: 'debug' }, 'LOG_LEVEL'],
     ['sandbox APNs', { APNS_ENVIRONMENT: 'sandbox' }, 'APNS_ENVIRONMENT'],
     ['missing APNs credentials', { APNS_KEY_ID: '' }, 'APNS'],
