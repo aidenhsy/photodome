@@ -3,6 +3,7 @@ import SwiftUI
 
 struct EventAlbumView: View {
     let access: StoredEventAccess
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var model: EventAlbumViewModel
     @ObservedObject private var uploads: BackgroundUploadManager
     @ObservedObject private var downloads: PhotoDownloadManager
@@ -95,7 +96,14 @@ struct EventAlbumView: View {
                             handlePhotoTap(photo)
                         } label: {
                             ZStack {
-                                AlbumThumbnail(url: photo.thumbnailURL)
+                                AlbumThumbnail(url: photo.thumbnailURL) {
+                                    Task {
+                                        await model
+                                            .recoverMediaURLAfterFailure(
+                                                photo.thumbnailURL
+                                            )
+                                    }
+                                }
 
                                 VStack {
                                     Spacer()
@@ -137,6 +145,13 @@ struct EventAlbumView: View {
             }
         }
         .onDisappear { model.disconnect() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                Task {
+                    await model.refreshMediaURLsIfNeeded()
+                }
+            }
+        }
         .onChange(of: access) { _, newAccess in
             model.updateAccess(newAccess)
         }
@@ -562,6 +577,7 @@ private struct AlbumActionButtonStyle: ButtonStyle {
 
 private struct AlbumThumbnail: View {
     let url: URL
+    let onLoadFailure: () -> Void
 
     var body: some View {
         Rectangle()
@@ -577,6 +593,7 @@ private struct AlbumThumbnail: View {
                     case .failure:
                         Image(systemName: "photo")
                             .foregroundStyle(AppTheme.secondaryInk)
+                            .onAppear(perform: onLoadFailure)
                     default:
                         ProgressView()
                     }
