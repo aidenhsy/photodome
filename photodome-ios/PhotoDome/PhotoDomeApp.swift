@@ -19,6 +19,10 @@ struct PhotoDomeApp: App {
             ) {
                 AlbumGridHitTargetRegressionView()
             } else if ProcessInfo.processInfo.arguments.contains(
+                "PhotoDomeUITestInviteCodeCopy"
+            ) {
+                InviteCodeCopyRegressionView()
+            } else if ProcessInfo.processInfo.arguments.contains(
                 "PhotoDomeUITestAttendeeList"
             ) {
                 AttendeeListRegressionView()
