@@ -25,7 +25,7 @@ struct PhotoUploadGrant: Sendable {
     let byteSize: Int
 }
 
-struct AlbumPhoto: Identifiable, Equatable, Sendable {
+struct AlbumPhoto: Codable, Identifiable, Equatable, Sendable {
     let id: String
     let contributorMemberID: String
     let width: Int
@@ -39,6 +39,7 @@ struct AlbumPhoto: Identifiable, Equatable, Sendable {
 
 struct AlbumPhotoPage: Equatable, Sendable {
     let photos: [AlbumPhoto]
+    let nextCursor: String?
     let readyPhotoCount: Int
 }
 
@@ -53,6 +54,21 @@ enum AlbumMediaURLRefreshPolicy {
             return false
         }
         return expiresAt <= now.addingTimeInterval(expiryLeadTime)
+    }
+
+    static func isUsable(
+        _ value: String,
+        at now: Date = Date()
+    ) -> Bool {
+        guard let expiresAt = parseDate(value) else {
+            return false
+        }
+        return expiresAt > now
+    }
+
+    static func date(_ value: String?) -> Date? {
+        guard let value else { return nil }
+        return parseDate(value)
     }
 
     private static func earliestExpiration(
