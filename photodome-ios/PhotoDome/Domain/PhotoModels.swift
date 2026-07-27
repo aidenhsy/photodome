@@ -42,6 +42,39 @@ struct AlbumPhotoPage: Equatable, Sendable {
     let readyPhotoCount: Int
 }
 
+enum AlbumMediaURLRefreshPolicy {
+    static let expiryLeadTime: TimeInterval = 30
+
+    static func shouldRefresh(
+        photos: [AlbumPhoto],
+        at now: Date = Date()
+    ) -> Bool {
+        guard let expiresAt = earliestExpiration(in: photos) else {
+            return false
+        }
+        return expiresAt <= now.addingTimeInterval(expiryLeadTime)
+    }
+
+    private static func earliestExpiration(
+        in photos: [AlbumPhoto]
+    ) -> Date? {
+        photos.compactMap { parseDate($0.urlsExpireAt) }.min()
+    }
+
+    private static func parseDate(_ value: String) -> Date? {
+        let parser = ISO8601DateFormatter()
+        parser.formatOptions = [
+            .withInternetDateTime,
+            .withFractionalSeconds,
+        ]
+        if let date = parser.date(from: value) {
+            return date
+        }
+        parser.formatOptions = [.withInternetDateTime]
+        return parser.date(from: value)
+    }
+}
+
 enum PhotoSelectionDecision: String, Codable, Sendable {
     case keep
     case skip

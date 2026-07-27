@@ -39,6 +39,7 @@
 		779A97DDFEDE82D23491832C /* BackgroundUploadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426DAB751E1A8F6DA8771890 /* BackgroundUploadManager.swift */; };
 		7C158913E4B50D294EE0824B /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84DEA6B3430001BF671810D /* AppConfiguration.swift */; };
 		7DCF124EDBB970366BF3704D /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1865F6B34CAD4766015B49E /* AccessibilityUITests.swift */; };
+		8A23D5FC205138BF2C53B87C /* AlbumMediaURLRefreshTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8E9C96BA35997C056D9B3F /* AlbumMediaURLRefreshTests.swift */; };
 		96082CA1853A0FA6190665CC /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21DE4AA8D75B3FDD9E422D75 /* QRCodeView.swift */; };
 		9716B9EFDEE820311A59B0D8 /* EventAlbumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 034AF26D00E4FF951EA46739 /* EventAlbumView.swift */; };
 		99C8E36898794F43199A8F11 /* PhotoDomeLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D3445F2D22F0B676E4CB50C5 /* PhotoDomeLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -168,6 +169,7 @@
 		E16D925B7C207B4E2AAC6B03 /* PhotoDomeLiveActivityBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDomeLiveActivityBundle.swift; sourceTree = "<group>"; };
 		E4BD28C9EB96414FDF687195 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		E574EF48A0B6F3E151F14467 /* PhotoDomeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoDomeApp.swift; sourceTree = "<group>"; };
+		EC8E9C96BA35997C056D9B3F /* AlbumMediaURLRefreshTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumMediaURLRefreshTests.swift; sourceTree = "<group>"; };
 		EDF287EBA6619151ABC514BE /* PrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyView.swift; sourceTree = "<group>"; };
 		EEB7CF91085721B4E1496A10 /* JoinEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinEventView.swift; sourceTree = "<group>"; };
 		EF26D897EFB8D0638B35E605 /* KeychainCapabilityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCapabilityStore.swift; sourceTree = "<group>"; };
@@ -341,6 +343,7 @@
 		CDCAFD2F1E9113E0750CA6A4 /* PhotoDomeTests */ = {
 			isa = PBXGroup;
 			children = (
+				EC8E9C96BA35997C056D9B3F /* AlbumMediaURLRefreshTests.swift */,
 				7C4F660B8346D0CBC7F85B5B /* APIClientIntegrationTests.swift */,
 				D4420AB7BB5DD965D6F3C081 /* AppConfigurationTests.swift */,
 				65912FFF59CAD59BCD1A80D4 /* AppThemeTests.swift */,
@@ -598,6 +601,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D278CD527F922E0EC791FC7 /* APIClientIntegrationTests.swift in Sources */,
+				8A23D5FC205138BF2C53B87C /* AlbumMediaURLRefreshTests.swift in Sources */,
 				36834C5793452BB3AF11A557 /* AppConfigurationTests.swift in Sources */,
 				3E554E74AEAE046EC4507B5B /* AppThemeTests.swift in Sources */,
 				3752277711A0B0BDC55A603F /* ErrorMessageTests.swift in Sources */,

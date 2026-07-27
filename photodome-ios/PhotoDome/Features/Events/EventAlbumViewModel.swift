@@ -1,5 +1,14 @@
 import Foundation
 
+protocol AlbumPhotoListing: Sendable {
+    func listPhotos(
+        eventID: String,
+        capability: String
+    ) async throws -> AlbumPhotoPage
+}
+
+extension APIClient: AlbumPhotoListing {}
+
 @MainActor
 final class EventAlbumViewModel: ObservableObject {
     @Published private(set) var photos: [AlbumPhoto] = []
@@ -12,14 +21,20 @@ final class EventAlbumViewModel: ObservableObject {
     private let onEventSignal: @MainActor (EventRealtimeSignal) -> Void
     private let photoLibraryWriter = PhotoLibraryWriter()
     private var api: APIClient?
+    private var photoListing: (any AlbumPhotoListing)?
     private var didBootstrap = false
+    private var lastMediaURLRecoveryAt: Date?
+
+    private static let mediaURLRecoveryCooldown: TimeInterval = 15
 
     init(
         access: StoredEventAccess,
-        onEventSignal: @escaping @MainActor (EventRealtimeSignal) -> Void
+        onEventSignal: @escaping @MainActor (EventRealtimeSignal) -> Void,
+        api: (any AlbumPhotoListing)? = nil
     ) {
         self.access = access
         self.onEventSignal = onEventSignal
+        photoListing = api
         readyPhotoCount = access.event.readyPhotoCount ?? 0
     }
 
@@ -29,11 +44,15 @@ final class EventAlbumViewModel: ObservableObject {
         await BackgroundUploadManager.shared.configure()
 
         do {
-            let identity = try await InstallationIdentityStore().identity()
-            api = APIClient(
-                baseURL: AppConfiguration.apiBaseURL,
-                installationIdentity: identity
-            )
+            if api == nil {
+                let identity = try await InstallationIdentityStore().identity()
+                let client = APIClient(
+                    baseURL: AppConfiguration.apiBaseURL,
+                    installationIdentity: identity
+                )
+                api = client
+                photoListing = client
+            }
             realtime.connect(
                 eventID: access.id,
                 capability: access.capability
@@ -47,27 +66,63 @@ final class EventAlbumViewModel: ObservableObject {
     }
 
     func refresh() async {
-        guard let api else { return }
+        guard let photoListing, !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
         do {
-            let page = try await api.listPhotos(
+            let page = try await photoListing.listPhotos(
                 eventID: access.id,
                 capability: access.capability
             )
             photos = page.photos
             readyPhotoCount = page.readyPhotoCount
-            EventLiveActivityManager.shared.sync(
-                access: access,
-                readyPhotoCount: page.readyPhotoCount,
-                api: api
-            )
+            if let api {
+                EventLiveActivityManager.shared.sync(
+                    access: access,
+                    readyPhotoCount: page.readyPhotoCount,
+                    api: api
+                )
+            }
             await BackgroundUploadManager.shared.acknowledgeReady(
                 photoIDs: Set(photos.map(\.id))
             )
         } catch {
             presentedError = error.photoDomeMessage
         }
+    }
+
+    func refreshMediaURLsIfNeeded(at now: Date = Date()) async {
+        guard
+            AlbumMediaURLRefreshPolicy.shouldRefresh(
+                photos: photos,
+                at: now
+            )
+        else {
+            return
+        }
+        await refresh()
+    }
+
+    func recoverMediaURLAfterFailure(
+        _ failedURL: URL,
+        at now: Date = Date()
+    ) async {
+        guard
+            photos.contains(where: {
+                $0.thumbnailURL == failedURL || $0.displayURL == failedURL
+            }),
+            !isLoading
+        else {
+            return
+        }
+        if let lastMediaURLRecoveryAt,
+            now.timeIntervalSince(lastMediaURLRecoveryAt)
+                < Self.mediaURLRecoveryCooldown
+        {
+            return
+        }
+        lastMediaURLRecoveryAt = now
+        await refresh()
     }
 
     func addPhoto(
