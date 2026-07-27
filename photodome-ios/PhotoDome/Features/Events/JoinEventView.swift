@@ -18,15 +18,8 @@ struct JoinEventView: View {
                     Image(systemName: "qrcode.viewfinder")
                         .font(.largeTitle.weight(.light))
                         .accessibilityHidden(true)
-                    Text("Join without an account")
+                    Text("Scan or enter a code")
                         .font(.system(.title2, design: .rounded, weight: .bold))
-                        .multilineTextAlignment(.center)
-                        .lineLimit(nil)
-                        .frame(maxWidth: .infinity)
-                        .fixedSize(horizontal: false, vertical: true)
-                    Text("Scan the host’s QR or enter the 8-character code.")
-                        .font(.system(.body, design: .rounded))
-                        .foregroundStyle(AppTheme.secondaryInk)
                         .multilineTextAlignment(.center)
                         .lineLimit(nil)
                         .frame(maxWidth: .infinity)
@@ -49,7 +42,7 @@ struct JoinEventView: View {
                     Text("Event code")
                         .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    TextField("", text: $code)
+                    TextField("Code", text: $code)
                         .font(
                             .system(
                                 .title3,
@@ -59,6 +52,8 @@ struct JoinEventView: View {
                         )
                         .textInputAutocapitalization(.characters)
                         .autocorrectionDisabled()
+                        .keyboardType(.asciiCapable)
+                        .submitLabel(.join)
                         .multilineTextAlignment(.center)
                         .padding(16)
                         .background(AppTheme.softFill)
@@ -71,12 +66,11 @@ struct JoinEventView: View {
                         )
                         .focused($isCodeFocused)
                         .onChange(of: code) {
-                            if !code.trimmingCharacters(
-                                in: .whitespacesAndNewlines
-                            ).isEmpty {
-                                validationMessage = nil
-                            }
+                            code = normalized(code)
+                            validationMessage = nil
                         }
+                        .onSubmit { submitCode() }
+
                     if let validationMessage {
                         Text(validationMessage)
                             .font(.footnote)
@@ -85,19 +79,7 @@ struct JoinEventView: View {
                 }
 
                 Button {
-                    let trimmedCode = code.trimmingCharacters(
-                        in: .whitespacesAndNewlines
-                    )
-                    guard !trimmedCode.isEmpty else {
-                        validationMessage = "Enter an event code."
-                        isCodeFocused = true
-                        return
-                    }
-                    isWorking = true
-                    Task {
-                        if await joinCode(trimmedCode) { dismiss() }
-                        isWorking = false
-                    }
+                    submitCode()
                 } label: {
                     if isWorking {
                         ProgressView().frame(maxWidth: .infinity)
@@ -130,6 +112,30 @@ struct JoinEventView: View {
                     if await handlePayload(payload) { dismiss() }
                 }
             }
+        }
+    }
+
+    private func normalized(_ value: String) -> String {
+        String(
+            value
+                .uppercased()
+                .filter { $0.isLetter || $0.isNumber }
+                .prefix(8)
+        )
+    }
+
+    private func submitCode() {
+        guard !isWorking else { return }
+        guard code.count == 8 else {
+            validationMessage = "Enter the 8-character code."
+            isCodeFocused = true
+            return
+        }
+
+        isWorking = true
+        Task {
+            if await joinCode(code) { dismiss() }
+            isWorking = false
         }
     }
 }

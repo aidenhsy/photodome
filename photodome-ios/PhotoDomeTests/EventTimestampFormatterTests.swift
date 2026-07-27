@@ -4,6 +4,32 @@ import XCTest
 @testable import PhotoDome
 
 final class EventTimestampFormatterTests: XCTestCase {
+    func testFormatsDeletionCountdownWithoutAFullTimestamp() throws {
+        let utc = try XCTUnwrap(TimeZone(identifier: "UTC"))
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = utc
+        let now = try XCTUnwrap(
+            ISO8601DateFormatter().date(from: "2026-07-28T10:00:00Z")
+        )
+
+        XCTAssertEqual(
+            EventTimestampFormatter.deletionCountdown(
+                "2026-08-02T18:00:00.000Z",
+                now: now,
+                calendar: calendar
+            ),
+            "Deletes in 5 days"
+        )
+        XCTAssertEqual(
+            EventTimestampFormatter.deletionCountdown(
+                "2026-07-29T01:00:00.000Z",
+                now: now,
+                calendar: calendar
+            ),
+            "Deletes tomorrow"
+        )
+    }
+
     func testFormatsEventTimeInTheRequestedLocalTimeZone() throws {
         let tokyo = try XCTUnwrap(TimeZone(identifier: "Asia/Tokyo"))
         let formatted = try XCTUnwrap(

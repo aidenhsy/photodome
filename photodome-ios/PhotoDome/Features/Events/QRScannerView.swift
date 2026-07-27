@@ -32,7 +32,7 @@ struct QRScannerView: View {
                     )
                 }
             }
-            .navigationTitle("Scan PhotoDome QR")
+            .navigationTitle("Scan code")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

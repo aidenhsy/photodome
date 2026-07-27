@@ -394,20 +394,6 @@ private struct EventCameraControlOverlay: View {
             Spacer()
 
             VStack(spacing: 12) {
-                Text("Tap once. PhotoDome saves and shares it automatically.")
-                    .font(
-                        .system(
-                            .footnote,
-                            design: .rounded,
-                            weight: .medium
-                        )
-                    )
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(.black.opacity(0.55), in: Capsule())
-
                 if !isLocationReady {
                     Text(locationMessage ?? "Waiting for precise location…")
                         .font(.system(.footnote, design: .rounded))

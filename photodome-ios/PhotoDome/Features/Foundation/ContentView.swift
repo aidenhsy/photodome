@@ -7,12 +7,12 @@ struct ContentView: View {
     @State private var showsCreate = false
     @State private var showsJoin = false
     @State private var showsSettings = false
-    @State private var showsMenu = false
     @State private var showsArchives = false
     @State private var pendingPermissionAction: PendingPermissionAction?
     @State private var pendingNameAction: PendingPermissionAction?
     @State private var hasDismissedInitialNamePrompt = false
     @State private var createdEventIDToOpen: String?
+    @State private var createdEventIDToInvite: String?
     @State private var path: [EventDeepLink] = []
     @State private var cameraPresentationRequestID: UUID?
 
@@ -66,11 +66,17 @@ struct ContentView: View {
             .navigationTitle("Your Events")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    HomeMenuButton {
-                        withAnimation(.easeInOut(duration: 0.22)) {
-                            showsMenu = true
+                if !model.activeEvents.isEmpty
+                    && !model.archivedEvents.isEmpty
+                {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showsArchives = true
+                        } label: {
+                            Image(systemName: "archivebox")
                         }
+                        .accessibilityLabel("Archives")
+                        .accessibilityIdentifier("archivesButton")
                     }
                 }
 
@@ -92,25 +98,17 @@ struct ContentView: View {
                     model: model,
                     initiallyPresentsCamera: route.opensCamera,
                     cameraPresentationRequestID: route.opensCamera
-                        ? cameraPresentationRequestID : nil
-                )
+                        ? cameraPresentationRequestID : nil,
+                    initiallyPresentsInvite:
+                        createdEventIDToInvite == route.eventID
+                ) {
+                    if createdEventIDToInvite == route.eventID {
+                        createdEventIDToInvite = nil
+                    }
+                }
             }
             .navigationDestination(isPresented: $showsArchives) {
                 ArchivedEventsView(model: model)
-            }
-        }
-        .overlay {
-            HomeNavigationMenu(
-                isPresented: $showsMenu,
-                archivedCount: model.archivedEvents.count
-            ) {
-                withAnimation(.easeInOut(duration: 0.22)) {
-                    showsMenu = false
-                }
-                Task { @MainActor in
-                    await Task.yield()
-                    showsArchives = true
-                }
             }
         }
         .task { await model.bootstrap() }
@@ -128,6 +126,7 @@ struct ContentView: View {
                     return false
                 }
                 createdEventIDToOpen = eventID
+                createdEventIDToInvite = eventID
                 return true
             }
         }
@@ -309,35 +308,33 @@ private struct HomeEmptyState: View {
             Text(
                 archivedCount == 0
                     ? "No events yet."
-                    : "No events in Your Events."
+                    : "No current events."
             )
             .font(.system(.title3, design: .rounded, weight: .semibold))
             .foregroundStyle(AppTheme.ink)
 
-            Text(message)
-                .font(.system(.footnote, design: .rounded))
-                .foregroundStyle(AppTheme.ink)
-
-            Button(action: openArchives) {
-                Label("View Archives", systemImage: "archivebox")
+            if archivedCount > 0 {
+                Button(action: openArchives) {
+                    HStack {
+                        Label("View Archives", systemImage: "archivebox")
+                        Spacer()
+                        Text("\(archivedCount)")
+                            .foregroundStyle(AppTheme.secondaryInk)
+                    }
                     .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(OutlineButtonStyle())
+                .accessibilityLabel(
+                    archivedCount == 1
+                        ? "View 1 archived event"
+                        : "View \(archivedCount) archived events"
+                )
+                .accessibilityIdentifier("emptyStateArchivesButton")
             }
-            .buttonStyle(OutlineButtonStyle())
-            .accessibilityIdentifier("emptyStateArchivesButton")
         }
         .foregroundStyle(AppTheme.ink)
         .padding(.horizontal, AppTheme.pagePadding)
         .padding(.vertical, PhotoDomeTokens.Space.x4)
-    }
-
-    private var message: String {
-        if archivedCount == 0 {
-            return "Archived events stay available in Archives and can be restored at any time."
-        }
-        if archivedCount == 1 {
-            return "You have 1 archived event. View or restore it at any time."
-        }
-        return "You have \(archivedCount) archived events. View or restore them at any time."
     }
 }
 
@@ -374,87 +371,6 @@ private struct ArchivedEventsView: View {
         }
         .navigationTitle("Archives")
         .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct HomeMenuButton: View {
-    let open: () -> Void
-
-    var body: some View {
-        Button(action: open) {
-            Image(systemName: "line.3.horizontal")
-        }
-        .accessibilityLabel("Menu")
-        .accessibilityIdentifier("menuButton")
-    }
-}
-
-private struct HomeNavigationMenu: View {
-    @Binding var isPresented: Bool
-    let archivedCount: Int
-    let openArchives: () -> Void
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .leading) {
-                if isPresented {
-                    Color.black.opacity(0.28)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.22)) {
-                                isPresented = false
-                            }
-                        }
-                        .accessibilityHidden(true)
-
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("PhotoDome")
-                            .font(
-                                .system(
-                                    .title2,
-                                    design: .rounded,
-                                    weight: .bold
-                                )
-                            )
-                            .padding(.bottom, PhotoDomeTokens.Space.x6)
-
-                        Button(action: openArchives) {
-                            HStack(spacing: PhotoDomeTokens.Space.x3) {
-                                Image(systemName: "archivebox")
-                                Text("Archives")
-                                Spacer()
-                                if archivedCount > 0 {
-                                    Text("\(archivedCount)")
-                                        .foregroundStyle(
-                                            AppTheme.secondaryInk
-                                        )
-                                }
-                            }
-                            .font(PhotoDomeTokens.TypeStyle.headline)
-                            .frame(
-                                minHeight:
-                                    PhotoDomeTokens.Size.minimumTouchTarget
-                            )
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("archivesMenuButton")
-
-                        Spacer()
-                    }
-                    .padding(.horizontal, AppTheme.pagePadding)
-                    .padding(.top, proxy.safeAreaInsets.top + 24)
-                    .padding(.bottom, proxy.safeAreaInsets.bottom + 24)
-                    .frame(width: min(proxy.size.width * 0.82, 320))
-                    .frame(maxHeight: .infinity, alignment: .topLeading)
-                    .background(AppTheme.canvas)
-                    .shadow(color: .black.opacity(0.16), radius: 24, x: 8)
-                    .transition(.move(edge: .leading))
-                }
-            }
-            .animation(.easeInOut(duration: 0.22), value: isPresented)
-        }
-        .allowsHitTesting(isPresented)
     }
 }
 
@@ -524,69 +440,56 @@ private struct EventCard: View {
     }
 
     var body: some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 7) {
-                HStack(spacing: PhotoDomeTokens.Space.x2) {
-                    Text(access.event.name)
-                        .font(
-                            .system(
-                                .title3,
-                                design: .rounded,
-                                weight: .semibold
-                            )
+        VStack(alignment: .leading, spacing: PhotoDomeTokens.Space.x2) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(access.event.name)
+                    .font(
+                        .system(
+                            .title3,
+                            design: .rounded,
+                            weight: .semibold
                         )
-                        .foregroundStyle(
-                            isEnded ? AppTheme.secondaryInk : AppTheme.ink
-                        )
-
-                    if isEnded {
-                        Text("ENDED")
-                            .font(AppTheme.eyebrow)
-                            .foregroundStyle(AppTheme.secondaryInk)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 3)
-                            .background(
-                                AppTheme.hairline.opacity(0.55),
-                                in: Capsule()
-                            )
-                    }
-                }
-
-                HStack(spacing: 10) {
-                    Label(
-                        "\(access.event.memberCount)",
-                        systemImage: "person.2"
                     )
-                    Text(access.event.role == .host ? "HOST" : "GUEST")
-                }
-                .font(AppTheme.eyebrow)
-                .foregroundStyle(AppTheme.secondaryInk)
+                    .foregroundStyle(
+                        isEnded ? AppTheme.secondaryInk : AppTheme.ink
+                    )
+                    .layoutPriority(1)
 
-                Text(
-                    "Hosted by \(access.event.hostDisplayName ?? "Host")"
+                Spacer(minLength: PhotoDomeTokens.Space.x2)
+
+                PhotoDomeLifecyclePill(
+                    title: isEnded ? "Ended" : "Live",
+                    tone: isEnded ? .neutral : .live
                 )
-                .font(.system(.footnote, design: .rounded))
-                .foregroundStyle(AppTheme.secondaryInk)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    if let started = EventTimestampFormatter.localDateTime(
-                        access.event.createdAt
-                    ) {
-                        Text("Started \(started)")
-                    }
-                    if isEnded,
-                        let ended = EventTimestampFormatter.localDateTime(
-                            access.event.endedAt
-                        )
-                    {
-                        Text("Ended \(ended)")
-                    }
-                }
-                .font(.system(.caption, design: .rounded))
-                .foregroundStyle(AppTheme.secondaryInk)
             }
 
-            Spacer()
+            HStack(spacing: PhotoDomeTokens.Space.x3) {
+                Label(photoCountLabel, systemImage: "photo.on.rectangle")
+                Label(
+                    peopleCountLabel,
+                    systemImage: "person.2"
+                )
+            }
+            .font(.system(.footnote, design: .rounded, weight: .medium))
+            .foregroundStyle(AppTheme.secondaryInk)
+
+            Text(
+                access.event.role == .host
+                    ? "You’re hosting"
+                    : "Hosted by \(access.event.hostDisplayName ?? "Host")"
+            )
+            .font(.system(.footnote, design: .rounded))
+            .foregroundStyle(AppTheme.secondaryInk)
+
+            if isEnded,
+                let countdown = EventTimestampFormatter.deletionCountdown(
+                    access.event.expiresAt
+                )
+            {
+                Text(countdown)
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundStyle(AppTheme.secondaryInk)
+            }
         }
         .padding(18)
         .background(
@@ -601,12 +504,21 @@ private struct EventCard: View {
         }
         .accessibilityElement(children: .combine)
     }
+
+    private var photoCountLabel: String {
+        let count = access.event.readyPhotoCount ?? 0
+        return count == 1 ? "1 photo" : "\(count) photos"
+    }
+
+    private var peopleCountLabel: String {
+        let count = access.event.memberCount
+        return count == 1 ? "1 person" : "\(count) people"
+    }
 }
 
 #if DEBUG
     struct EventArchiveRegressionView: View {
         @State private var isArchived = false
-        @State private var showsMenu = false
         @State private var showsArchives = false
 
         var body: some View {
@@ -633,15 +545,6 @@ private struct EventCard: View {
                 }
                 .navigationTitle("Your Events")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        HomeMenuButton {
-                            withAnimation(.easeInOut(duration: 0.22)) {
-                                showsMenu = true
-                            }
-                        }
-                    }
-                }
                 .navigationDestination(for: EventDeepLink.self) { _ in
                     Text("Event detail")
                 }
@@ -662,20 +565,6 @@ private struct EventCard: View {
                     .listStyle(.plain)
                     .navigationTitle("Archives")
                     .navigationBarTitleDisplayMode(.inline)
-                }
-            }
-            .overlay {
-                HomeNavigationMenu(
-                    isPresented: $showsMenu,
-                    archivedCount: isArchived ? 1 : 0
-                ) {
-                    withAnimation(.easeInOut(duration: 0.22)) {
-                        showsMenu = false
-                    }
-                    Task { @MainActor in
-                        await Task.yield()
-                        showsArchives = true
-                    }
                 }
             }
         }
