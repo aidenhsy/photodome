@@ -11,8 +11,7 @@ struct EventAlbumView: View {
     @State private var preparingUploads: [PreparingAlbumPhoto] = []
     @State private var showsCamera: Bool
     let cameraPresentationRequestID: UUID?
-    @State private var photoPendingRemoval: AlbumPhoto?
-    @State private var photoPendingRedownload: AlbumPhoto?
+    @State private var photoConfirmation: AlbumPhotoConfirmation?
 
     init(
         access: StoredEventAccess,
@@ -130,6 +129,15 @@ struct EventAlbumView: View {
                         .contextMenu {
                             photoActions(photo)
                         }
+                        .confirmationDialog(
+                            photoConfirmationTitle,
+                            isPresented: confirmationBinding(for: photo),
+                            titleVisibility: .visible
+                        ) {
+                            photoConfirmationActions(for: photo)
+                        } message: {
+                            Text(photoConfirmationMessage)
+                        }
                         .accessibilityHint(accessibilityHint(for: photo))
                     }
                 }
@@ -195,45 +203,60 @@ struct EventAlbumView: View {
         } message: {
             Text(model.presentedError ?? "")
         }
-        .confirmationDialog(
-            "Delete this photo?",
-            isPresented: Binding(
-                get: { photoPendingRemoval != nil },
-                set: { if !$0 { photoPendingRemoval = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
+    }
+
+    private func confirmationBinding(for photo: AlbumPhoto) -> Binding<Bool> {
+        Binding(
+            get: { photoConfirmation?.photoID == photo.id },
+            set: { isPresented in
+                if !isPresented, photoConfirmation?.photoID == photo.id {
+                    photoConfirmation = nil
+                }
+            }
+        )
+    }
+
+    private var photoConfirmationTitle: String {
+        switch photoConfirmation {
+        case .removal:
+            "Delete this photo?"
+        case .redownload:
+            "Download this photo again?"
+        case nil:
+            ""
+        }
+    }
+
+    private var photoConfirmationMessage: String {
+        switch photoConfirmation {
+        case .removal:
+            "It disappears for everyone and is permanently deleted."
+        case .redownload:
+            "This adds another copy to your Photos library."
+        case nil:
+            ""
+        }
+    }
+
+    @ViewBuilder
+    private func photoConfirmationActions(for photo: AlbumPhoto) -> some View {
+        switch photoConfirmation {
+        case .removal:
             Button("Delete photo", role: .destructive) {
-                guard let photo = photoPendingRemoval else { return }
-                photoPendingRemoval = nil
+                photoConfirmation = nil
                 Task { await model.removePhoto(photo.id) }
             }
-            Button("Cancel", role: .cancel) {
-                photoPendingRemoval = nil
-            }
-        } message: {
-            Text(
-                "It disappears for everyone and is permanently deleted."
-            )
-        }
-        .confirmationDialog(
-            "Download this photo again?",
-            isPresented: Binding(
-                get: { photoPendingRedownload != nil },
-                set: { if !$0 { photoPendingRedownload = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
+        case .redownload:
             Button("Download again") {
-                guard let photo = photoPendingRedownload else { return }
-                photoPendingRedownload = nil
+                photoConfirmation = nil
                 Task { await download(photo, again: true) }
             }
-            Button("Cancel", role: .cancel) {
-                photoPendingRedownload = nil
-            }
-        } message: {
-            Text("This adds another copy to your Photos library.")
+        case nil:
+            EmptyView()
+        }
+
+        Button("Cancel", role: .cancel) {
+            photoConfirmation = nil
         }
     }
 
@@ -247,7 +270,7 @@ struct EventAlbumView: View {
         if model.access.event.state != .expiring {
             if isYours || isSaved {
                 Button {
-                    photoPendingRedownload = photo
+                    photoConfirmation = .redownload(photo)
                 } label: {
                     Label(
                         "Download again",
@@ -265,7 +288,7 @@ struct EventAlbumView: View {
 
         if isYours {
             Button(role: .destructive) {
-                photoPendingRemoval = photo
+                photoConfirmation = .removal(photo)
             } label: {
                 Label("Delete", systemImage: "trash")
             }
@@ -299,7 +322,7 @@ struct EventAlbumView: View {
 
         guard !isDownloading else { return }
         if isYours || isSaved {
-            photoPendingRedownload = photo
+            photoConfirmation = .redownload(photo)
         } else {
             Task { await download(photo, again: false) }
         }
@@ -430,6 +453,18 @@ struct EventAlbumView: View {
                     systemImage: "checkmark"
                 )
             }
+        }
+    }
+}
+
+private enum AlbumPhotoConfirmation {
+    case removal(AlbumPhoto)
+    case redownload(AlbumPhoto)
+
+    var photoID: String {
+        switch self {
+        case .removal(let photo), .redownload(let photo):
+            photo.id
         }
     }
 }

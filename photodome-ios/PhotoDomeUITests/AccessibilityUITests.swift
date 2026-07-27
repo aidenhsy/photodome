@@ -211,9 +211,42 @@ final class AccessibilityUITests: XCTestCase {
             app.navigationBars["Attendees"].waitForExistence(timeout: 5)
         )
         XCTAssertTrue(app.staticTexts["Host Person"].exists)
-        XCTAssertTrue(app.staticTexts["Guest Person"].exists)
+        XCTAssertTrue(app.staticTexts["Guest Person 1"].exists)
         XCTAssertFalse(app.buttons["removeAttendee.host"].exists)
-        XCTAssertTrue(app.buttons["removeAttendee.guest"].exists)
+        XCTAssertTrue(app.buttons["removeAttendee.guest-1"].exists)
+    }
+
+    func testLowerAttendeeWarningUsesTheTappedRowAsItsSource() {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments.append("PhotoDomeUITestAttendeeList")
+        app.launch()
+
+        let attendeeCount = app.buttons["attendeeCountButton"]
+        XCTAssertTrue(attendeeCount.waitForExistence(timeout: 5))
+        attendeeCount.tap()
+
+        let lowerRemoveButton = app.buttons["removeAttendee.guest-8"]
+        for _ in 0..<4 where !lowerRemoveButton.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(lowerRemoveButton.isHittable)
+        let sourceMidY = lowerRemoveButton.frame.midY
+
+        lowerRemoveButton.tap()
+
+        let warningTitle = app.staticTexts["Remove Guest Person 8?"]
+        XCTAssertTrue(warningTitle.waitForExistence(timeout: 2))
+        XCTAssertGreaterThan(
+            warningTitle.frame.midY,
+            app.windows.firstMatch.frame.midY,
+            "A lower-row confirmation should remain in the lower screen region."
+        )
+        XCTAssertLessThan(
+            abs(warningTitle.frame.midY - sourceMidY),
+            300,
+            "The confirmation should stay near the tapped lower row."
+        )
     }
 
     private func auditCurrentScreen() throws {

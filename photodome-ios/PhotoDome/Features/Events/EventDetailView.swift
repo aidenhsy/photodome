@@ -69,60 +69,6 @@ struct EventDetailView: View {
                 .refreshable { await model.refresh(eventID: eventID) }
                 .navigationTitle(access.event.name)
                 .navigationBarTitleDisplayMode(.inline)
-                .confirmationDialog(
-                    "Rotate the join code?",
-                    isPresented: $showsRotationConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Rotate code", role: .destructive) {
-                        Task {
-                            isWorking = true
-                            _ = await model.rotateJoinCode(eventID: eventID)
-                            isWorking = false
-                        }
-                    }
-                    Button("Cancel", role: .cancel) {}
-                } message: {
-                    Text(
-                        "Old QR codes and codes will stop working. People already in the event keep access."
-                    )
-                }
-                .confirmationDialog(
-                    "End this event?",
-                    isPresented: $showsEndConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("End event", role: .destructive) {
-                        Task {
-                            isWorking = true
-                            _ = await model.endEvent(eventID: eventID)
-                            isWorking = false
-                        }
-                    }
-                    Button("Cancel", role: .cancel) {}
-                } message: {
-                    Text(
-                        "The live session ends now. Photos remain available for seven days, and uploads stay open unless you restrict them."
-                    )
-                }
-                .confirmationDialog(
-                    "Restrict new uploads?",
-                    isPresented: $showsRestrictionConfirmation,
-                    titleVisibility: .visible
-                ) {
-                    Button("Restrict uploads", role: .destructive) {
-                        Task {
-                            isWorking = true
-                            _ = await model.restrictUploads(eventID: eventID)
-                            isWorking = false
-                        }
-                    }
-                    Button("Cancel", role: .cancel) {}
-                } message: {
-                    Text(
-                        "New photos can’t be started. Uploads that were already admitted can still finish or retry."
-                    )
-                }
             } else {
                 ContentUnavailableView(
                     "Event unavailable",
@@ -262,6 +208,24 @@ struct EventDetailView: View {
             }
             .buttonStyle(OutlineButtonStyle())
             .disabled(isWorking)
+            .confirmationDialog(
+                "Rotate the join code?",
+                isPresented: $showsRotationConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Rotate code", role: .destructive) {
+                    Task {
+                        isWorking = true
+                        _ = await model.rotateJoinCode(eventID: eventID)
+                        isWorking = false
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text(
+                    "Old QR codes and codes will stop working. People already in the event keep access."
+                )
+            }
 
             Button("Transfer host role") {
                 Task {
@@ -279,6 +243,24 @@ struct EventDetailView: View {
                 }
                 .buttonStyle(DestructiveButtonStyle())
                 .disabled(isWorking)
+                .confirmationDialog(
+                    "End this event?",
+                    isPresented: $showsEndConfirmation,
+                    titleVisibility: .visible
+                ) {
+                    Button("End event", role: .destructive) {
+                        Task {
+                            isWorking = true
+                            _ = await model.endEvent(eventID: eventID)
+                            isWorking = false
+                        }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text(
+                        "The live session ends now. Photos remain available for seven days, and uploads stay open unless you restrict them."
+                    )
+                }
             } else if access.event.state == .ended,
                 access.event.uploadsRestrictedAt == nil
             {
@@ -287,6 +269,24 @@ struct EventDetailView: View {
                 }
                 .buttonStyle(OutlineButtonStyle())
                 .disabled(isWorking)
+                .confirmationDialog(
+                    "Restrict new uploads?",
+                    isPresented: $showsRestrictionConfirmation,
+                    titleVisibility: .visible
+                ) {
+                    Button("Restrict uploads", role: .destructive) {
+                        Task {
+                            isWorking = true
+                            _ = await model.restrictUploads(eventID: eventID)
+                            isWorking = false
+                        }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text(
+                        "New photos can’t be started. Uploads that were already admitted can still finish or retry."
+                    )
+                }
             }
 
             Text(
@@ -307,7 +307,6 @@ private struct AttendeeListView: View {
     let access: StoredEventAccess
     @ObservedObject var model: EventAppViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var memberPendingRemoval: EventMember?
     @State private var isWorking = false
 
     private var members: [EventMember]? {
@@ -323,7 +322,14 @@ private struct AttendeeListView: View {
                         viewerRole: access.event.role,
                         isWorking: isWorking
                     ) { member in
-                        memberPendingRemoval = member
+                        Task {
+                            isWorking = true
+                            _ = await model.removeMember(
+                                eventID: access.id,
+                                memberID: member.id
+                            )
+                            isWorking = false
+                        }
                     }
                     .refreshable {
                         await model.loadMembers(eventID: access.id)
@@ -343,44 +349,7 @@ private struct AttendeeListView: View {
             .task {
                 await model.loadMembers(eventID: access.id)
             }
-            .confirmationDialog(
-                removalTitle,
-                isPresented: Binding(
-                    get: { memberPendingRemoval != nil },
-                    set: { if !$0 { memberPendingRemoval = nil } }
-                ),
-                titleVisibility: .visible
-            ) {
-                Button("Remove attendee", role: .destructive) {
-                    guard let member = memberPendingRemoval else {
-                        return
-                    }
-                    memberPendingRemoval = nil
-                    Task {
-                        isWorking = true
-                        _ = await model.removeMember(
-                            eventID: access.id,
-                            memberID: member.id
-                        )
-                        isWorking = false
-                    }
-                }
-                Button("Cancel", role: .cancel) {
-                    memberPendingRemoval = nil
-                }
-            } message: {
-                Text(
-                    "Their event access is revoked immediately on every open screen."
-                )
-            }
         }
-    }
-
-    private var removalTitle: String {
-        guard let memberPendingRemoval else {
-            return "Remove this attendee?"
-        }
-        return "Remove \(memberPendingRemoval.displayName)?"
     }
 }
 
@@ -459,6 +428,7 @@ private struct AttendeeListContent: View {
     let viewerRole: EventRole
     let isWorking: Bool
     let remove: (EventMember) -> Void
+    @State private var memberPendingRemoval: EventMember?
 
     var body: some View {
         List(members) { member in
@@ -512,12 +482,40 @@ private struct AttendeeListContent: View {
                 viewerRole: viewerRole
             ) {
                 Button("Remove", role: .destructive) {
-                    remove(member)
+                    memberPendingRemoval = member
                 }
                 .disabled(isWorking)
                 .accessibilityIdentifier("removeAttendee.\(member.id)")
+                .confirmationDialog(
+                    "Remove \(member.displayName)?",
+                    isPresented: removalBinding(for: member),
+                    titleVisibility: .visible
+                ) {
+                    Button("Remove attendee", role: .destructive) {
+                        memberPendingRemoval = nil
+                        remove(member)
+                    }
+                    Button("Cancel", role: .cancel) {
+                        memberPendingRemoval = nil
+                    }
+                } message: {
+                    Text(
+                        "Their event access is revoked immediately on every open screen."
+                    )
+                }
             }
         }
+    }
+
+    private func removalBinding(for member: EventMember) -> Binding<Bool> {
+        Binding(
+            get: { memberPendingRemoval?.id == member.id },
+            set: { isPresented in
+                if !isPresented, memberPendingRemoval?.id == member.id {
+                    memberPendingRemoval = nil
+                }
+            }
+        )
     }
 }
 
@@ -532,22 +530,25 @@ private struct AttendeeListContent: View {
     struct AttendeeListRegressionView: View {
         @State private var showsAttendees = false
 
-        private let members = [
-            EventMember(
-                id: "host",
-                displayName: "Host Person",
-                role: .host,
-                joinedAt: "2026-07-28T00:00:00.000Z",
-                isViewer: true
-            ),
-            EventMember(
-                id: "guest",
-                displayName: "Guest Person",
-                role: .guest,
-                joinedAt: "2026-07-28T00:01:00.000Z",
-                isViewer: false
-            ),
-        ]
+        private let members =
+            [
+                EventMember(
+                    id: "host",
+                    displayName: "Host Person",
+                    role: .host,
+                    joinedAt: "2026-07-28T00:00:00.000Z",
+                    isViewer: true
+                )
+            ]
+            + (1...8).map { index in
+                EventMember(
+                    id: "guest-\(index)",
+                    displayName: "Guest Person \(index)",
+                    role: .guest,
+                    joinedAt: "2026-07-28T00:0\(index):00.000Z",
+                    isViewer: false
+                )
+            }
 
         var body: some View {
             AttendeeCountControl(
