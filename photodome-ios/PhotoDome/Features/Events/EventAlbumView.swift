@@ -488,23 +488,26 @@ private struct PreparingPhotoGridCell: View {
     let photo: PreparingAlbumPhoto
 
     var body: some View {
-        ZStack {
-            if let image = photo.image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                Rectangle()
-                    .fill(AppTheme.softFill)
-            }
-
-            UploadPhotoOverlay(state: nil)
+        AlbumSquareTile {
+            Rectangle()
+                .fill(AppTheme.softFill)
+                .overlay {
+                    if let image = photo.image {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .accessibilityHidden(true)
+                    }
+                }
+                .overlay {
+                    UploadPhotoOverlay(state: nil)
+                }
         }
-        .aspectRatio(1, contentMode: .fit)
-        .clipped()
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Photo preparing to upload")
+        .accessibilityLabel("Photo uploading")
+        .accessibilityHint(
+            "The upload continues automatically."
+        )
         .accessibilityIdentifier("albumUpload.\(photo.id.uuidString)")
     }
 }
@@ -530,7 +533,7 @@ private struct UploadPhotoGridCell: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(accessibilityLabel)
                 .accessibilityHint(
-                    "The photo will become available when processing finishes."
+                    "The upload continues automatically."
                 )
                 .accessibilityIdentifier(
                     "albumUpload.\(item.id.uuidString)"
@@ -547,13 +550,9 @@ private struct UploadPhotoGridCell: View {
     }
 
     private var accessibilityLabel: String {
-        switch item.state {
+        switch AlbumUploadPresentation(state: item.state) {
         case .uploading:
             "Photo uploading"
-        case .verifying:
-            "Photo upload verifying"
-        case .processing:
-            "Photo processing"
         case .failed:
             "Photo upload failed"
         }
@@ -564,10 +563,12 @@ private struct UploadPhotoOverlay: View {
     let state: UploadQueueState?
 
     var body: some View {
+        let presentation = AlbumUploadPresentation(state: state)
+
         ZStack {
             Color.black.opacity(0.26)
 
-            if state == .failed {
+            if presentation == .failed {
                 Image(systemName: "arrow.clockwise")
                     .font(.system(.title3, weight: .bold))
                     .foregroundStyle(.white)
@@ -585,8 +586,8 @@ private struct UploadPhotoOverlay: View {
                 Spacer()
                 HStack {
                     PhotoStatusBadge(
-                        title: label,
-                        systemImage: icon
+                        title: presentation.label,
+                        systemImage: presentation.icon
                     )
                     Spacer(minLength: 0)
                 }
@@ -594,32 +595,34 @@ private struct UploadPhotoOverlay: View {
             }
         }
     }
+}
 
-    private var label: String {
+enum AlbumUploadPresentation: Equatable {
+    case uploading
+    case failed
+
+    init(state: UploadQueueState?) {
         switch state {
-        case nil:
-            "Preparing"
+        case nil, .uploading, .verifying, .processing:
+            self = .uploading
+        case .failed:
+            self = .failed
+        }
+    }
+
+    var label: String {
+        switch self {
         case .uploading:
             "Uploading"
-        case .verifying:
-            "Verifying"
-        case .processing:
-            "Processing"
         case .failed:
             "Tap to retry"
         }
     }
 
-    private var icon: String {
-        switch state {
-        case nil:
-            "photo"
+    var icon: String {
+        switch self {
         case .uploading:
             "arrow.up"
-        case .verifying:
-            "checkmark.shield"
-        case .processing:
-            "wand.and.stars"
         case .failed:
             "exclamationmark.circle"
         }
@@ -631,26 +634,39 @@ private struct LocalAlbumThumbnail: View {
     @State private var image: UIImage?
 
     var body: some View {
-        Rectangle()
-            .fill(AppTheme.softFill)
-            .aspectRatio(1, contentMode: .fit)
-            .overlay {
-                if let image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    ProgressView()
+        AlbumSquareTile {
+            Rectangle()
+                .fill(AppTheme.softFill)
+                .overlay {
+                    if let image {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                            .accessibilityHidden(true)
+                    } else {
+                        ProgressView()
+                    }
                 }
-            }
-            .clipped()
-            .task(id: fileURL) {
-                image = await Self.loadImage(at: fileURL)
-            }
+        }
+        .task(id: fileURL) {
+            image = await Self.loadImage(at: fileURL)
+        }
     }
 
     private static func loadImage(at fileURL: URL) async -> UIImage? {
         await LocalImageThumbnailer.make(fileURL: fileURL)
+    }
+}
+
+private struct AlbumSquareTile<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        Rectangle()
+            .fill(.clear)
+            .aspectRatio(1, contentMode: .fit)
+            .overlay { content() }
+            .clipped()
     }
 }
 
@@ -674,6 +690,48 @@ struct AlbumGridCell<Label: View>: View {
 }
 
 #if DEBUG
+    struct AlbumUploadTileRegressionView: View {
+        private static let uploadID = UUID(
+            uuidString: "00000000-0000-0000-0000-000000000001"
+        )!
+
+        var body: some View {
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                ],
+                spacing: PhotoDomeTokens.Space.x1
+            ) {
+                PreparingPhotoGridCell(
+                    photo: PreparingAlbumPhoto(
+                        id: Self.uploadID,
+                        image: Self.portraitImage
+                    )
+                )
+                .overlay {
+                    Color.clear
+                        .accessibilityElement()
+                        .accessibilityIdentifier("albumUploadFrame")
+                }
+            }
+            .padding(PhotoDomeTokens.Space.x4)
+        }
+
+        private static let portraitImage: UIImage = {
+            let renderer = UIGraphicsImageRenderer(
+                size: CGSize(width: 100, height: 240)
+            )
+            return renderer.image { context in
+                UIColor.systemBlue.setFill()
+                context.cgContext.fill(
+                    CGRect(x: 0, y: 0, width: 100, height: 240)
+                )
+            }
+        }()
+    }
+
     struct AlbumGridHitTargetRegressionView: View {
         @State private var lastTappedPhoto = "none"
 
@@ -799,30 +857,31 @@ private struct AlbumThumbnail: View {
     let onLoadFailure: () -> Void
 
     var body: some View {
-        Rectangle()
-            .fill(AppTheme.softFill)
-            .aspectRatio(1, contentMode: .fit)
-            .overlay {
-                CachedEventImage(
-                    eventID: eventID,
-                    photo: photo,
-                    variant: .thumbnail,
-                    eventExpiresAt: eventExpiresAt,
-                    contentMode: .fill,
-                    onFailure: onLoadFailure
-                ) {
-                    if AlbumMediaURLRefreshPolicy.isUsable(
-                        photo.urlsExpireAt
+        AlbumSquareTile {
+            Rectangle()
+                .fill(AppTheme.softFill)
+                .overlay {
+                    CachedEventImage(
+                        eventID: eventID,
+                        photo: photo,
+                        variant: .thumbnail,
+                        eventExpiresAt: eventExpiresAt,
+                        contentMode: .fill,
+                        onFailure: onLoadFailure
                     ) {
-                        ProgressView()
-                    } else {
-                        Image(systemName: "photo")
-                            .foregroundStyle(AppTheme.secondaryInk)
+                        if AlbumMediaURLRefreshPolicy.isUsable(
+                            photo.urlsExpireAt
+                        ) {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "photo")
+                                .foregroundStyle(AppTheme.secondaryInk)
+                        }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .accessibilityHidden(true)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
-            .clipped()
-            .accessibilityLabel("Event photo")
+        }
+        .accessibilityLabel("Event photo")
     }
 }

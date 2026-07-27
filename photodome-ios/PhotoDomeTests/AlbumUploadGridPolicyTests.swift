@@ -59,6 +59,30 @@ final class AlbumUploadGridPolicyTests: XCTestCase {
         XCTAssertTrue(visible.isEmpty)
     }
 
+    func testAllActivePipelineStatesUseOneUploadingPresentation() {
+        let activeStates: [UploadQueueState?] = [
+            nil,
+            .uploading,
+            .verifying,
+            .processing,
+        ]
+
+        for state in activeStates {
+            let presentation = AlbumUploadPresentation(state: state)
+            XCTAssertEqual(presentation, .uploading)
+            XCTAssertEqual(presentation.label, "Uploading")
+            XCTAssertEqual(presentation.icon, "arrow.up")
+        }
+    }
+
+    func testFailedPipelineStateKeepsRetryPresentation() {
+        let presentation = AlbumUploadPresentation(state: .failed)
+
+        XCTAssertEqual(presentation, .failed)
+        XCTAssertEqual(presentation.label, "Tap to retry")
+        XCTAssertEqual(presentation.icon, "exclamationmark.circle")
+    }
+
     private func makeItem(
         id: UUID,
         eventID: String = "event",
