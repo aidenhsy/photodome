@@ -2,25 +2,23 @@
 
 ## Source of truth
 
-Product documentation lives at:
-
-`/Users/aidenyang/Documents/brain/10 Projects/photodome`
+Product documentation lives in this repository at `docs/`.
 
 Before planning or implementing product work, read:
 
-1. `README.md`
-2. `meetings/2026-07-25 Product Walkthrough.md`
-3. `specs/Product Discovery Brief.md`
-4. `specs/Media Upload and Retention.md` before implementing identity, uploads, GCS delivery, image processing, or cleanup
-5. `specs/Architecture and Implementation Plan v0.md` before scaffolding or implementing any milestone
+1. `docs/README.md`
+2. `docs/meetings/2026-07-25 Product Walkthrough.md`
+3. `docs/specs/Product Discovery Brief.md`
+4. `docs/specs/Media Upload and Retention.md` before implementing identity, uploads, GCS delivery, image processing, or cleanup
+5. `docs/specs/Architecture and Implementation Plan v0.md` before scaffolding or implementing any milestone
 
 ## Working rules
 
 - Do not invent product behavior, users, business rules, platform choices, or technical constraints. Mark unknowns as `TBD`.
-- Keep raw conversation notes in `meetings/`, planned behavior in `specs/`, shipped behavior in `reference/`, and confirmed defects in `bugs/`.
-- When implementation changes the current behavior, update the relevant vault documentation in the same task.
+- Keep raw conversation notes in `docs/meetings/`, planned behavior in `docs/specs/`, shipped behavior in `docs/reference/`, and confirmed defects in `docs/bugs/`.
+- When implementation changes the current behavior, update the relevant documentation in `docs/` in the same task.
 - Do not describe planned behavior as shipped.
-- Keep secrets, credentials, personal data, and production data out of the repository and vault.
+- Keep secrets, credentials, personal data, and production data out of the repository, including `docs/`.
 - Store event media in a separate private GCS bucket. Seven days after an event ends, permanently delete its originals, variants, and server metadata; do not discard database object keys before GCS deletion is verified.
 - Host upload restriction blocks new reservations but must not cancel uploads that were already reserved/in progress.
 - Follow any more specific `AGENTS.md` added later in a subdirectory.
@@ -28,8 +26,7 @@ Before planning or implementing product work, read:
 ## Repository workflow and releases
 
 - For any CI, environment, deployment, versioning, signing, TestFlight, or release
-  work, first read
-  `/Users/aidenyang/Documents/brain/10 Projects/photodome/reference/Deployment & Release.md`.
+  work, first read `docs/reference/Deployment & Release.md`.
 - Work on short-lived `feat/…`, `fix/…`, `chore/…`, or `docs/…` branches from
   current `origin/main`; never use `main` as the working branch. Open a PR, treat
   CI (`API CI and Deploy` → `verify`) as authoritative, and squash-merge only
@@ -38,10 +35,10 @@ Before planning or implementing product work, read:
 - Merging to `main` deploys `photodome-api` to production automatically after a
   green verify. New required environment variables must exist in the server
   `.env` before merge, or startup fails closed.
-- Version and build numbers follow the vault's `Release Versioning.md` and are
+- Version and build numbers follow `docs/reference/Release Versioning.md` and are
   set only in `photodome-ios/project.yml` (then `xcodegen generate`). Project
   metadata edited directly in the pbxproj or Info.plist is lost on regeneration.
-- Exactly one vault note in `releases/` has `status: current`; rotate it per the
+- Exactly one note in `docs/releases/` has `status: current`; rotate it per the
   Deployment & Release runbook after every upload.
 
 ## Repository status

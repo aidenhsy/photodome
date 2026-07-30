@@ -4,19 +4,22 @@ PhotoDome is a shared event-photo app. An accountless host creates an event and 
 
 ## Project documentation
 
-The canonical project knowledge base lives in the Obsidian brain vault:
-
-`/Users/aidenyang/Documents/brain/10 Projects/photodome`
+The canonical project knowledge base lives in this repository under `docs/`
+(plain Markdown; opening `docs/` as an Obsidian vault makes the `[[wikilinks]]`
+clickable, but Obsidian is optional).
 
 Start with:
 
-1. `README.md` — documentation map and working rules.
-2. `meetings/2026-07-25 Product Walkthrough.md` — raw product explanation and decisions.
-3. `specs/Product Discovery Brief.md` — the approved product definition and MVP scope.
-4. `specs/Media Upload and Retention.md` — GCS, background upload, image, and expiry design.
-5. `specs/Architecture and Implementation Plan v0.md` — build-ready architecture, contracts, milestones, and release gates.
-6. `specs/PhotoDome Design System.md` — permanent identity, tokens, components, and accessibility rules.
-7. `reference/Release Versioning.md` — marketing versions, build numbers, TestFlight rebuilds, patches, and parallel release lines.
+1. `docs/README.md` — documentation map and working rules.
+2. `docs/meetings/2026-07-25 Product Walkthrough.md` — raw product explanation and decisions.
+3. `docs/specs/Product Discovery Brief.md` — the approved product definition and MVP scope.
+4. `docs/specs/Media Upload and Retention.md` — GCS, background upload, image, and expiry design.
+5. `docs/specs/Architecture and Implementation Plan v0.md` — build-ready architecture, contracts, milestones, and release gates.
+6. `docs/specs/PhotoDome Design System.md` — permanent identity, tokens, components, and accessibility rules.
+7. `docs/reference/Release Versioning.md` — marketing versions, build numbers, TestFlight rebuilds, patches, and parallel release lines.
+
+Handing the project over? `HANDOFF.md` lists everything that lives outside the
+repo (server, GCS, Apple, DNS access) and the first-hour reading order.
 
 ## Current status
 
@@ -126,14 +129,14 @@ xcodebuild -project PhotoDome.xcodeproj \
 ```
 
 The current product definition and remaining open decisions are in
-`specs/Product Discovery Brief.md`. As-built details are in the vault's
-`reference/M1 Accountless Event Spine.md` and
-`reference/M2 Direct Upload and Live Album.md`,
-`reference/M3 Camera and Live Activity.md`, and
-`reference/M4 Host Lifecycle and Moderation.md`, and
-`reference/M5 Personal Curation and Download.md`, and
-`reference/M6 Expiry Security and Scale.md`, and
-`reference/M7 Local Release Hardening.md`. The active external release gates
-are in `specs/M7 Release Checklist.md`, and durable deployment numbering is in
-`reference/Release Versioning.md`. Real-bucket verification is in
-`reference/GCS Development Bucket Validation.md`.
+`docs/specs/Product Discovery Brief.md`. As-built details are in
+`docs/reference/M1 Accountless Event Spine.md` and
+`docs/reference/M2 Direct Upload and Live Album.md`,
+`docs/reference/M3 Camera and Live Activity.md`, and
+`docs/reference/M4 Host Lifecycle and Moderation.md`, and
+`docs/reference/M5 Personal Curation and Download.md`, and
+`docs/reference/M6 Expiry Security and Scale.md`, and
+`docs/reference/M7 Local Release Hardening.md`. The active external release gates
+are in `docs/specs/M7 Release Checklist.md`, and durable deployment numbering is in
+`docs/reference/Release Versioning.md`. Real-bucket verification is in
+`docs/reference/GCS Development Bucket Validation.md`.

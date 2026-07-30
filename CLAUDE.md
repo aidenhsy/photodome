@@ -1,17 +1,16 @@
 # photodome
 
-## Read the brain vault first
+## Read the project docs first
 
-At the start of every new session, read the photodome project docs in the brain vault BEFORE doing anything else:
+At the start of every new session, read the project docs in `docs/` BEFORE doing anything else:
 
-`/Users/aidenyang/Documents/brain/10 Projects/photodome/`
+- Start with `docs/README.md` — the documentation map and working rules
+- `docs/specs/` — design specs and PRDs for features
+- `docs/reference/` — as-built docs for shipped milestones (architecture, conventions)
+- `docs/meetings/` — raw conversation notes and product decisions
+- `docs/bugs/` — bug reports and write-ups
+- `docs/standards/` — authoring standards for specs, reference docs, and bug reports
 
-- Start with `README.md` — the documentation map and working rules
-- `specs/` — design specs and PRDs for features
-- `reference/` — as-built docs for shipped milestones (architecture, conventions)
-- `meetings/` — raw conversation notes and product decisions
-- `bugs/` — bug reports and write-ups
-
-The brain vault is the base documentation for this project. Treat it as the source of truth for product intent, feature specs, and past decisions; the code in `photodome-api/` and `photodome-ios/` shows the current implementation.
+`docs/` is the base documentation for this project. Treat it as the source of truth for product intent, feature specs, and past decisions; the code in `photodome-api/` and `photodome-ios/` shows the current implementation.
 
 Also follow the working rules in this repo's `AGENTS.md` (source-of-truth reading order, documentation hygiene, and media-lifecycle constraints).
